@@ -12,6 +12,7 @@ share it simultaneously:
 pyserial speaks socket:// natively, so gw-ctl needs no code changes.
 """
 import argparse
+import datetime
 import select
 import socket
 import sys
@@ -36,6 +37,20 @@ def main() -> int:
     srv.setblocking(False)
     clients: list[socket.socket] = []
     log = open(args.log, "ab", buffering=0)
+    pending = bytearray()  # incomplete log line (raw serial bytes)
+
+    def stamp() -> bytes:
+        return datetime.datetime.now().strftime("[%H:%M:%S] ").encode()
+
+    def log_bytes(chunk: bytes) -> None:
+        pending.extend(chunk)
+        while True:
+            nl = pending.find(b"\n")
+            if nl < 0:
+                break
+            line = bytes(pending[: nl + 1])
+            del pending[: nl + 1]
+            log.write(stamp() + line.replace(b"\r\n", b"\n"))
     print(f"mux: {args.device}@{args.baud} -> {args.log} + tcp 127.0.0.1:{args.port}",
           flush=True)
 
@@ -50,7 +65,7 @@ def main() -> int:
                     time.sleep(1)
                     continue
                 if chunk:
-                    log.write(chunk)
+                    log_bytes(chunk)
                     dead = []
                     for c in clients:
                         try:
@@ -75,6 +90,8 @@ def main() -> int:
                     clients.remove(c)
                     c.close()
     except KeyboardInterrupt:
+        if pending:
+            log.write(stamp() + bytes(pending) + b"\n")
         pass
     return 0
 
