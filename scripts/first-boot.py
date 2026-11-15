@@ -69,6 +69,7 @@ class Mux:
 
 
 def main():
+    stop_only = os.environ.get("STOP_ONLY")
     print("== 1. reboot via SSH ==", flush=True)
     if not os.environ.get("NO_REBOOT"):
         r = subprocess.run(["ssh", "-o", "ConnectTimeout=8", GW_SSH, "reboot"],
@@ -124,6 +125,9 @@ def main():
                 saw_prompt = False
     if hits < 2:
         print("WARN: autoboot not stopped twice; continuing anyway", flush=True)
+    if stop_only:
+        print("STOP_ONLY: leaving board at U-Boot prompt", flush=True)
+        return 0
     time.sleep(2)
     m.buf.clear()
 
