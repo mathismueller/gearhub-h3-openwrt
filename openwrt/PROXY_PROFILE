@@ -1,0 +1,5 @@
+# Proxy profile until Device/focalcrest_gearhub merges upstream.
+# Build this existing board in ImageBuilder, boot the resulting initramfs
+# with our external sun8i-h3-focalcrest-gearhub.dtb via the stage-2 chainloader.
+PROXY_PROFILE=friendlyarm_nanopi-m1-plus
+# Same brcmfmac + cypress-firmware-43430-sdio Wi-Fi as our board.

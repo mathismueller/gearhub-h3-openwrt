@@ -1,0 +1,10 @@
+/bin/
+/build/
+/dl/
+/staging_dir/
+*.bin
+*.img
+*.img.gz
+*.ipk
+*.apk
+.DS_Store

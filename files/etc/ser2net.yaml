@@ -1,0 +1,15 @@
+# ser2net v4 YAML — radio-only gateway.
+# Remote hosts run Zigbee2MQTT / Z-Wave JS against these TCP ports.
+# Keep in sync with radio firmware baudrates (both 115200 on this board).
+
+connection: &con-ttyS2
+  accepter: tcp,3332
+  connector: serialdev,/dev/ttyS2,115200n81,local
+  options:
+    kickolduser: true
+
+connection: &con-ttyS3
+  accepter: tcp,3333
+  connector: serialdev,/dev/ttyS3,115200n81,local
+  options:
+    kickolduser: true

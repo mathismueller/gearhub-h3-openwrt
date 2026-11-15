@@ -1,0 +1,76 @@
+name: imagebuilder-initramfs
+
+on:
+  push:
+    paths-ignore:
+      - README.md
+  pull_request:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions: {}
+
+jobs:
+  build-initramfs:
+    name: Build initramfs (ImageBuilder x86_64)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      OPENWRT_VERSION: "25.12.5"
+      TARGET: sunxi/cortexa7
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          df -h
+
+      - name: Download ImageBuilder
+        run: |
+          IB="openwrt-imagebuilder-${OPENWRT_VERSION}-sunxi-cortexa7.Linux-x86_64"
+          URL="https://downloads.openwrt.org/releases/${OPENWRT_VERSION}/targets/${TARGET}/${IB}.tar.zst"
+          echo "URL=$URL" >> "$GITHUB_ENV"
+          echo "IB=$IB" >> "$GITHUB_ENV"
+          curl -fSL -o "/tmp/${IB}.tar.zst" "$URL"
+
+      - name: Extract ImageBuilder
+        run: |
+          tar --use-compress-program=unzstd -xf "/tmp/${IB}.tar.zst" -C /tmp
+          echo "IBDIR=/tmp/${IB}" >> "$GITHUB_ENV"
+
+      - name: Build initramfs (proxy profile)
+        run: |
+          PROFILE="$(grep PROXY_PROFILE openwrt/PROXY_PROFILE | cut -d= -f2)"
+          echo "proxy profile: $PROFILE"
+          cd "$IBDIR"
+          make image PROFILE="$PROFILE" \
+            PACKAGES="ser2net kmod-brcmfmac cypress-firmware-43430-sdio kmod-gpio-button-hotplug kmod-rtc-sunxi kmod-leds-gpio -dnsmasq" \
+            FILES="$GITHUB_WORKSPACE/files/"
+          mkdir -p "$GITHUB_WORKSPACE/artifacts"
+          cp bin/targets/sunxi/cortexa7/*initramfs-kernel.bin "$GITHUB_WORKSPACE/artifacts/"
+          cp bin/targets/sunxi/cortexa7/*.manifest "$GITHUB_WORKSPACE/artifacts/" || true
+          (cd "$GITHUB_WORKSPACE/artifacts" && sha256sum * > sha256sums.txt)
+          ls -lh "$GITHUB_WORKSPACE/artifacts/"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c4a875d1fc6a0a # v7.0.1
+        with:
+          name: openwrt-initramfs
+          path: artifacts/*
+          compression-level: 9
+          if-no-files-found: error
+
+      - name: Upload release assets
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" \
+            --repo "${{ github.repository }}" \
+            --clobber \
+            artifacts/*
