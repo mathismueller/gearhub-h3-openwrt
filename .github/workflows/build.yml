@@ -2,8 +2,8 @@ name: build-firmware
 
 # Full OpenWrt source build (x86_64 Ubuntu runner).
 # ImageBuilder cannot emit per-device initramfs-kernel.bin, so we build
-# from source. Proxy profile until our Device/focalcrest_gearhub + DTS
-# patch land (see openwrt/); boot with the external GearHub DTB via U-Boot.
+# from source. Uses proxy profile friendlyarm_nanopi-m1-plus until
+# Device/focalcrest_gearhub + DTS patch land, plus our dtc-compiled DTB.
 on:
   push:
     paths-ignore:
@@ -46,7 +46,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential clang flex bison g++ gawk \
             gcc-multilib g++-multilib gettext git libncurses-dev libssl-dev \
-            python3-setuptools rsync swig unzip zlib1g-dev file wget
+            python3-setuptools rsync swig unzip zlib1g-dev file wget \
+            device-tree-compiler
+
+      - name: Compile and validate GearHub DTB
+        run: |
+          mkdir -p artifacts
+          dtc -I dts -O dtb -o artifacts/sun8i-h3-focalcrest-gearhub.dtb \
+            gearhub/openwrt/target/sunxi/dts/sun8i-h3-focalcrest-gearhub.dts
 
       - name: Clone OpenWrt
         run: |
@@ -65,6 +72,12 @@ jobs:
           cat > .config <<EOF
           CONFIG_TARGET_sunxi=y
           CONFIG_TARGET_sunxi_cortexa7=y
+          CONFIG_TARGET_sunxi_cortexa7_DEVICE_${PROFILE}=y
+          CONFIG_TARGET_ROOTFS_INITRAMFS=y
+          CONFIG_PACKAGE_ser2net=y
+          CONFIG_PACKAGE_kmod-wdt-gpio=y
+          CONFIG_PACKAGE_uboot-envtools=y
+          CONFIG_PACKAGE_gpiod-tools=y
           EOF
           make defconfig
 
@@ -74,12 +87,11 @@ jobs:
 
       - name: Build images
         working-directory: openwrt
-        run: make -j"$(nproc)" world
+        run: make -j"$(nproc)"
 
       - name: Collect artifacts
         run: |
-          mkdir -p artifacts
-          cp openwrt/bin/targets/sunxi/cortexa7/*"${PROFILE}"*initramfs-kernel.bin artifacts/ 2>/dev/null || true
+          cp openwrt/bin/targets/sunxi/cortexa7/*"${PROFILE}"*initramfs* artifacts/ 2>/dev/null || true
           cp openwrt/bin/targets/sunxi/cortexa7/*"${PROFILE}"*sysupgrade.bin artifacts/ 2>/dev/null || true
           cp openwrt/bin/targets/sunxi/cortexa7/*"${PROFILE}"*sdcard.img.gz artifacts/ 2>/dev/null || true
           cp openwrt/bin/targets/sunxi/cortexa7/*.manifest artifacts/ 2>/dev/null || true
