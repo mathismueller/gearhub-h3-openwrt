@@ -17,7 +17,9 @@ Scope is deliberately narrow: **RAM-boot `initramfs` only, no eMMC `sysupgrade` 
 * `files/` — ImageBuilder overlay: `ser2net.yaml`, `sysupgrade.conf`
 * `boot/boot-openwrt.cmd` — `os=openwrt` stanza to merge into the chainloader `boot.cmd`
 * `scripts/build.sh` — x86_64-only ImageBuilder wrapper (does **not** run on aarch64 Mac, use GH Action)
-* `.github/workflows/imagebuilder.yml` — builds `initramfs-kernel.bin` on `25.12` + publishes artifacts
+* `.github/workflows/build.yml` — full `25.12.x` source build on x86_64
+  (ImageBuilder can't emit per-device initramfs), publishes initramfs +
+  sysupgrade + sdcard + manifest
 
 ## Fast debug loop (no flash)
 
