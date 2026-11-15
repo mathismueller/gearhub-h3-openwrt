@@ -10,3 +10,4 @@ artifacts/
 *.ipk
 *.apk
 .DS_Store
+__pycache__/
