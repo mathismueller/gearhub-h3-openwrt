@@ -138,7 +138,7 @@ Troubleshooting table (ship in `docs/INSTALL.md`):
 | Symptom | Cause → fix |
 |---|---|
 | No serial output | RX/TX swapped → swap the two data wires |
-| `tftpboot` timeout | `serverip`/`tftpsrvport` wrong, or stock (stage-1) U-Boot → chainload first |
+| `tftpboot` timeout | server on wrong port (`uboot24.bin` has no `tftpsrvport`, always `:69`), firewall, or unsettled link → serve `:69`, verify `ping` alive first |
 | `bootm` resets board | image > 8 MiB cap → `bootz`, slimmer initramfs, or rebuilt `uboot24.bin` |
 | `eth0` MAC `00:…` | env injection lost → preinit fixup from `ethaddr` |
 | `sysupgrade` bricks boot | raw sectors touched → restore from `hornbach-emmc.img` reference, never `dd` below sector 2048 |

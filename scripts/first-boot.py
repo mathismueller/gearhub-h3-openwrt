@@ -21,7 +21,10 @@ import time
 MUX_HOST, MUX_PORT = "127.0.0.1", 3335
 GW_SSH = "root@169.254.77.2"
 SERVER_IP = "169.254.65.108"
-TFTP_PORT = "6969"
+# NOTE: stage-2 uboot24.bin has no tftpsrvport/wget support (checked strings:
+# tftpboot + tftpblocksize/tftpwindowsize/tftptimeout only). The TFTP server
+# MUST listen on standard port 69. Our unprivileged :6969 instance is only
+# good for Mac-side self-tests, never for the board.
 KADDR, FADDR = "0x42000000", "0x43000000"
 ZIMAGE = "openwrt-initramfs-zImage"
 DTB = "sun8i-h3-focalcrest-gearhub.dtb"
@@ -111,7 +114,7 @@ def main():
         "setenv ipaddr 169.254.77.3",
         "setenv netmask 255.255.0.0",
         f"setenv serverip {SERVER_IP}",
-        f"setenv tftpsrvport {TFTP_PORT}",
+        # No tftpsrvport: uboot24.bin always uses TFTP port 69.
         f"ping {SERVER_IP}",
     ]
     print("== 4. network ==", flush=True)
