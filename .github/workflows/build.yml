@@ -121,6 +121,7 @@ jobs:
           cp openwrt/bin/targets/sunxi/cortexa7/*"${PROFILE}"*initramfs* artifacts/ 2>/dev/null || true
           cp openwrt/bin/targets/sunxi/cortexa7/*"${PROFILE}"*sysupgrade.bin artifacts/ 2>/dev/null || true
           cp openwrt/bin/targets/sunxi/cortexa7/*"${PROFILE}"*sdcard.img.gz artifacts/ 2>/dev/null || true
+          cp openwrt/build_dir/target-*/linux-sunxi_cortexa7/zImage artifacts/openwrt-gearhub-zImage 2>/dev/null || true
           cp openwrt/bin/targets/sunxi/cortexa7/*.manifest artifacts/ 2>/dev/null || true
           cp openwrt/bin/targets/sunxi/cortexa7/sha256sums artifacts/ 2>/dev/null || true
           ls -lh artifacts/

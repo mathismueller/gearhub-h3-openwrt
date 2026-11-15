@@ -13,12 +13,17 @@ MMC="${MMC:-/dev/mmcblk0}"
 [ -b "$MMC" ] || { echo "ERROR: no eMMC block device found" >&2; exit 1; }
 
 SDCARD_IMG="${1:-}"
-BACKUP_DIR="${2:-/tmp/stock-backup}"
+ZIMAGE="${2:-}"
+DTB="${3:-}"
+BOOT_SCR="${4:-}"
+BACKUP_DIR="${5:-/tmp/stock-backup}"
 
-[ -n "$SDCARD_IMG" ] && [ -s "$SDCARD_IMG" ] || {
-    echo "Usage: $0 <openwrt-*-squashfs-sdcard.img[.gz]> [stock-backup-dir]" >&2
-    exit 1
-}
+for f in "$SDCARD_IMG" "$ZIMAGE" "$DTB" "$BOOT_SCR"; do
+    [ -n "$f" ] && [ -s "$f" ] || {
+        echo "Usage: $0 <squashfs-sdcard.img[.gz]> <zImage> <gearhub.dtb> <boot.scr> [stock-backup-dir]" >&2
+        exit 1
+    }
+done
 
 # Preflight 1: verify factory U-Boot env at 0x88000 is readable
 echo "$MMC 0x88000 0x20000" > /etc/fw_env.config
@@ -79,15 +84,15 @@ sleep 2
 # Write p2 SquashFS from OpenWrt sdcard image (OpenWrt fstools auto-creates rootfs_data overlay)
 dd if="$RAW_IMG" of="${MMC}p2" bs=512 skip="$IMG_P2_START" count="$IMG_P2_SIZE" conv=fsync
 
-# Copy OpenWrt kernel/DTB into existing p1:/boot/ without touching uboot24.bin or /boot.scr
-mkdir -p /tmp/img-p1 /tmp/p1
-mount -o ro,loop,offset=$((IMG_P1_START * 512)) "$RAW_IMG" /tmp/img-p1
+# Copy OpenWrt zImage, GearHub DTB, and boot.scr onto existing p1 (uboot24.bin untouched)
+mkdir -p /tmp/p1
 mount "${MMC}p1" /tmp/p1
 mkdir -p /tmp/p1/boot
-cp -a /tmp/img-p1/* /tmp/p1/boot/ 2>/dev/null || true
+cp "$ZIMAGE" /tmp/p1/boot/zImage
+cp "$DTB" /tmp/p1/boot/sun8i-h3-focalcrest-gearhub.dtb
+cp "$BOOT_SCR" /tmp/p1/boot.scr
 sync
 umount /tmp/p1
-umount /tmp/img-p1
 rm -f "$RAW_IMG"
 
 echo "DONE: ${MMC}p1 kept in-place (uboot24.bin + /boot.scr untouched), ${MMC}p2 flashed."
