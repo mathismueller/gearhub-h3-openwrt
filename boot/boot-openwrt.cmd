@@ -24,6 +24,11 @@ fi
 echo "=== [Stage-2] OpenWrt eMMC Boot ==="
 setenv fdt_high ffffffff
 setenv bootargs "console=ttyS0,115200 earlyprintk root=/dev/mmcblk1p2 rootwait watchdog.open_timeout=0"
-load mmc 1:1 ${kernel_addr_r} /boot/zImage
 load mmc 1:1 ${fdt_addr_r} /boot/sun8i-h3-focalcrest-gearhub.dtb
-bootz ${kernel_addr_r} - ${fdt_addr_r}
+if test -e mmc 1:1 /boot/uImage; then
+    load mmc 1:1 ${kernel_addr_r} /boot/uImage
+    bootm ${kernel_addr_r} - ${fdt_addr_r}
+else
+    load mmc 1:1 ${kernel_addr_r} /boot/zImage
+    bootz ${kernel_addr_r} - ${fdt_addr_r}
+fi

@@ -66,10 +66,8 @@ platform_do_upgrade() {
 		if mount -t vfat -o ro,loop /tmp/img-p1.vfat /tmp/img-p1; then
 			mount -t vfat -o rw,noatime "/dev/$part1" /tmp/emmc-p1
 			mkdir -p /tmp/emmc-p1/boot
-			cp -af /tmp/img-p1/* /tmp/emmc-p1/boot/ 2>/dev/null || true
-			if [ ! -f /tmp/img-p1/zImage ] && [ -f /tmp/img-p1/uImage ]; then
-				dd if=/tmp/img-p1/uImage of=/tmp/emmc-p1/boot/zImage bs=64 skip=1 2>/dev/null
-			fi
+			[ -f /tmp/img-p1/uImage ] && cp -af /tmp/img-p1/uImage /tmp/emmc-p1/boot/uImage
+			[ -f /tmp/img-p1/zImage ] && cp -af /tmp/img-p1/zImage /tmp/emmc-p1/boot/zImage
 			sync
 			umount /tmp/emmc-p1
 			umount /tmp/img-p1
