@@ -2,6 +2,7 @@
 /build/
 /dl/
 /staging_dir/
+.venv/
 *.bin
 *.img
 *.img.gz
