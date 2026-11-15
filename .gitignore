@@ -4,6 +4,8 @@
 /staging_dir/
 .venv/
 artifacts/
+artifacts-*/
+stock-backup/
 *.bin
 *.img
 *.img.gz

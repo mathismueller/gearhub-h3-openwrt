@@ -60,6 +60,7 @@ jobs:
         run: |
           git clone --branch "v${OPENWRT_VERSION}" --depth 1 \
             https://github.com/openwrt/openwrt.git openwrt
+          mkdir -p openwrt/.ccache
 
       - name: Cache OpenWrt downloads (dl/)
         uses: actions/cache@v4
@@ -89,6 +90,10 @@ jobs:
           {
             echo "CONFIG_GPIO_WATCHDOG=y"
             echo "CONFIG_GPIO_WATCHDOG_ARCH_INITCALL=y"
+            echo "CONFIG_SERIAL_DEV_BUS=y"
+            echo "CONFIG_SERIAL_DEV_CTRL_TTYPORT=y"
+            echo "CONFIG_BT_HCIUART_SERDEV=y"
+            echo "CONFIG_BT_HCIUART_BCM=y"
           } >> target/linux/sunxi/config-6.12
           cat > .config <<EOF
           CONFIG_TARGET_sunxi=y
@@ -96,12 +101,15 @@ jobs:
           CONFIG_TARGET_sunxi_cortexa7_DEVICE_${PROFILE}=y
           CONFIG_TARGET_ROOTFS_INITRAMFS=y
           CONFIG_CCACHE=y
+          CONFIG_CCACHE_DIR="${{ github.workspace }}/openwrt/.ccache"
           CONFIG_PACKAGE_ser2net=y
           CONFIG_PACKAGE_uboot-envtools=y
           CONFIG_PACKAGE_gpiod-tools=y
           CONFIG_PACKAGE_kmod-rtc-sunxi=y
           CONFIG_PACKAGE_kmod-rtc-pcf8563=y
           CONFIG_PACKAGE_kmod-spi-dev=y
+          CONFIG_PACKAGE_kmod-bluetooth=y
+          CONFIG_PACKAGE_bluez-utils=y
           EOF
           make defconfig
 

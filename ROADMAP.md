@@ -74,7 +74,8 @@ Steps:
 
 * GitHub Releases publish `initramfs`, `sysupgrade.bin`, `sha256sums`, and package manifest per OpenWrt `25.12.x` bump.
 * Each release smoke-tested: RAM-boot → `sysupgrade` → `sysupgrade` rollback to previous release.
-* Radio GBLs stay versioned in `silabs-firmware-builder`, never bundled inside `sysupgrade.bin`.
+* **Optional Bluetooth (`BCM43430A1`)**: The `BCM43430A1` has RAM-only patchram (`BCM43430A1.hcd`), which is proprietary and must not be committed to git. Users who want Bluetooth can extract `/lib/firmware/brcm/BCM43430A1.hcd` from their `stock-p2.img.gz` backup (or running stock OS) onto OpenWrt and list it in `/etc/sysupgrade.conf`.
+* **Radio GBLs**: Versioned in `silabs-firmware-builder`, never bundled inside `sysupgrade.bin`. Document one-time TCP flashing via `ser2net` (`:3332`/`:3333`) in `docs/INSTALL.md`.
 
 ---
 

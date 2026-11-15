@@ -32,9 +32,9 @@ ETHADDR="$(fw_printenv -n ethaddr 2>/dev/null || true)"
 echo "Preflight OK: $MMC ethaddr=$ETHADDR"
 
 # Preflight 2: verify existing p1 starts >= 2048 and holds uboot24.bin + boot.scr
-P1_CUR="$(sfdisk -l -o Start,Sectors "$MMC" | awk -v dev="${MMC}p1" '$1 == dev || $0 ~ dev {print $2, $3}' || true)"
-P1_CUR_START="$(sfdisk -d "$MMC" | awk -F'start=|,' -v dev="${MMC}p1" '$0 ~ dev {gsub(/ /,"",$2); print $2}')"
-P1_CUR_SIZE="$(sfdisk -d "$MMC" | awk -F'size=|,' -v dev="${MMC}p1" '$0 ~ dev {gsub(/ /,"",$4); print $4}')"
+MMC_NAME="${MMC##*/}"
+P1_CUR_START="$(cat "/sys/block/${MMC_NAME}/${MMC_NAME}p1/start")"
+P1_CUR_SIZE="$(cat "/sys/block/${MMC_NAME}/${MMC_NAME}p1/size")"
 [ -n "$P1_CUR_START" ] && [ "$P1_CUR_START" -ge 2048 ] || {
     echo "ERROR: existing ${MMC}p1 start ($P1_CUR_START) < 2048; aborting" >&2
     exit 1
@@ -47,38 +47,59 @@ mount -o ro "${MMC}p1" /tmp/p1
 [ -s /tmp/p1/boot.scr ] || { umount /tmp/p1; echo "ERROR: chainloader boot.scr missing on ${MMC}p1; aborting" >&2; exit 1; }
 umount /tmp/p1
 
-# Preflight 3: back up stock partition table + p1 + p2 for clean rollback
-mkdir -p "$BACKUP_DIR"
-sfdisk -d "$MMC" > "$BACKUP_DIR/stock-ptable.sfdisk"
-dd if="${MMC}p1" of="$BACKUP_DIR/stock-p1.img" bs=1M conv=fsync
-dd if="${MMC}p2" bs=1M | gzip -1 > "$BACKUP_DIR/stock-p2.img.gz"
-echo "Stock backup saved to $BACKUP_DIR (copy this off-device before rebooting!)"
+# Preflight 3: back up raw 0..2047 (1 MiB) + partition table + p1 + p2 for full rollback
+if [ "${SKIP_BACKUP:-0}" != "1" ]; then
+    mkdir -p "$BACKUP_DIR"
+    dd if="$MMC" of="$BACKUP_DIR/stock-raw-0-2047.bin" bs=512 count=2048 conv=fsync
+    partx -s "$MMC" > "$BACKUP_DIR/stock-ptable.txt" 2>/dev/null || true
+    dd if="${MMC}p1" of="$BACKUP_DIR/stock-p1.img" bs=1M conv=fsync
+    dd if="${MMC}p2" bs=1M | gzip -1 > "$BACKUP_DIR/stock-p2.img.gz"
+    echo "Stock backup saved to $BACKUP_DIR (copy this off-device before rebooting!)"
+fi
 
-# Unpack OpenWrt sdcard image and locate its p1 (kernel/dtb) and p2 (SquashFS)
+# Unpack OpenWrt sdcard image and locate its p2 (SquashFS)
 RAW_IMG="/tmp/openwrt-sdcard.img"
 case "$SDCARD_IMG" in
     *.gz) gzip -dc "$SDCARD_IMG" > "$RAW_IMG" ;;
     *)    cp "$SDCARD_IMG" "$RAW_IMG" ;;
 esac
 
-IMG_P1_START="$(sfdisk -d "$RAW_IMG" | awk -F'start=|,' '/img1/ {gsub(/ /,"",$2); print $2}')"
-IMG_P2_START="$(sfdisk -d "$RAW_IMG" | awk -F'start=|,' '/img2/ {gsub(/ /,"",$2); print $2}')"
-IMG_P2_SIZE="$(sfdisk -d "$RAW_IMG" | awk -F'size=|,' '/img2/ {gsub(/ /,"",$4); print $4}')"
+IMG_P2_START="$(dd if="$RAW_IMG" bs=1 skip=470 count=4 2>/dev/null | hexdump -e '1/4 "%u\n"')"
+IMG_P2_SIZE="$(dd if="$RAW_IMG" bs=1 skip=474 count=4 2>/dev/null | hexdump -e '1/4 "%u\n"')"
+[ -n "$IMG_P2_START" ] && [ -n "$IMG_P2_SIZE" ] && [ "$IMG_P2_SIZE" -gt 0 ] || {
+    echo "ERROR: failed to read p2 geometry from $RAW_IMG" >&2
+    exit 1
+}
 
 # Unmount p2/p3+ (leave p1 definition intact; only update p2 onward in table)
 for p in "${MMC}"p*; do
     umount "$p" 2>/dev/null || true
 done
 
-sfdisk --no-reread "$MMC" <<EOF
+if command -v sfdisk >/dev/null 2>&1; then
+    sfdisk --no-reread "$MMC" <<EOF
 label: dos
 unit: sectors
 
 ${MMC}p1 : start=${P1_CUR_START}, size=${P1_CUR_SIZE}, type=c, bootable
 ${MMC}p2 : start=${P2_NEW_START}, type=83
 EOF
-
-partprobe "$MMC" 2>/dev/null || true
+    partprobe "$MMC" 2>/dev/null || partx -u "$MMC" 2>/dev/null || true
+else
+    # Update MBR p2 entry (offset 462) and clear p3/p4 (478..509), leaving p1 (446..461) intact
+    DISK_SECTORS="$(cat "/sys/block/${MMC_NAME}/size")"
+    P2_NEW_SIZE=$((DISK_SECTORS - P2_NEW_START))
+    le32_esc() {
+        printf '\\x%02x\\x%02x\\x%02x\\x%02x' \
+            $(($1 & 255)) $((($1 >> 8) & 255)) $((($1 >> 16) & 255)) $((($1 >> 24) & 255))
+    }
+    P2_FMT="\\x00\\xfe\\xff\\xff\\x83\\xfe\\xff\\xff$(le32_esc "$P2_NEW_START")$(le32_esc "$P2_NEW_SIZE")"
+    printf "$P2_FMT" | dd of="$MMC" bs=1 seek=462 count=16 conv=notrunc 2>/dev/null
+    dd if=/dev/zero of="$MMC" bs=1 seek=478 count=32 conv=notrunc 2>/dev/null
+    sync
+    partx -d --nr 2:4 "$MMC" 2>/dev/null || true
+    partx -a --nr 2 "$MMC"
+fi
 sleep 2
 
 # Write p2 SquashFS from OpenWrt sdcard image (OpenWrt fstools auto-creates rootfs_data overlay)
