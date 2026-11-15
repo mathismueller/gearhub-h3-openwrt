@@ -16,6 +16,11 @@ on:
 
 permissions: {}
 
+# One build at a time per branch; a new push cancels the stale one.
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-sunxi:
     name: Full source build (sunxi/cortexa7)

@@ -71,13 +71,23 @@ class Mux:
 def main():
     print("== 1. reboot via SSH ==", flush=True)
     if not os.environ.get("NO_REBOOT"):
-        try:
-            subprocess.run(["ssh", "-o", "ConnectTimeout=8", GW_SSH, "reboot"],
+        r = subprocess.run(["ssh", "-o", "ConnectTimeout=8", GW_SSH, "reboot"],
                            timeout=25, capture_output=True)
-            print("reboot issued", flush=True)
-        except Exception as e:
-            print(f"SSH reboot failed ({e}); power-cycle manually if needed",
-                  flush=True)
+        print(f"ssh reboot rc={r.returncode}", flush=True)
+        if r.returncode != 0:
+            sys.exit("FAIL: SSH reboot not delivered")
+        print("waiting for SSH to drop (reboot in progress)...", flush=True)
+        dropped = False
+        for _ in range(24):
+            time.sleep(5)
+            p = subprocess.run(["ssh", "-o", "ConnectTimeout=5", GW_SSH, "true"],
+                               timeout=15, capture_output=True)
+            if p.returncode != 0:
+                dropped = True
+                break
+        if not dropped:
+            sys.exit("FAIL: SSH still up after 120s, reboot did not land")
+        print("SSH down, reset imminent", flush=True)
         time.sleep(3)
     else:
         print("NO_REBOOT=1, attaching to current boot", flush=True)
