@@ -43,6 +43,16 @@ jobs:
           tar --use-compress-program=unzstd -xf "/tmp/${IB}.tar.zst" -C /tmp
           echo "IBDIR=/tmp/${IB}" >> "$GITHUB_ENV"
 
+      - name: Work around upstream IB+APK prepare_rootfs bug
+        # 25.12.x include/rootfs.mk expands `$(if $(IB),,awk...)` to empty
+        # under ImageBuilder, yielding `then  ;` -> bash syntax error.
+        # The branch is dead code under APK; `:` keeps it parseable.
+        # Re-check each OPENWRT_VERSION bump, drop when upstream fixes it.
+        run: |
+          grep -c 'if $(IB),,awk' "/tmp/${IB}/include/rootfs.mk"
+          sed -i 's/$(if $(IB),,awk/$(if $(IB),:,awk/' "/tmp/${IB}/include/rootfs.mk"
+          grep -n 'if $(IB),:,awk' "/tmp/${IB}/include/rootfs.mk"
+
       - name: Build initramfs (proxy profile)
         run: |
           PROFILE="$(grep PROXY_PROFILE openwrt/PROXY_PROFILE | cut -d= -f2)"

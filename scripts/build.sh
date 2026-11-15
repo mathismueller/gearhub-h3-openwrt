@@ -13,6 +13,10 @@ curl -fSL -o "/tmp/${IB}.tar.zst" "${URL}"
 tar --use-compress-program=unzstd -xf "/tmp/${IB}.tar.zst" -C /tmp
 cd "/tmp/${IB}"
 
+# Work around upstream 25.12.x IB+APK prepare_rootfs bug (`then  ;`
+# syntax error, dead code under APK). Re-check on version bumps.
+sed -i 's/$(if $(IB),,awk/$(if $(IB),:,awk/' include/rootfs.mk
+
 echo "==> building initramfs for ${PROFILE}"
 make image PROFILE="${PROFILE}" \
   PACKAGES="ser2net kmod-brcmfmac cypress-firmware-43430-sdio kmod-gpio-button-hotplug kmod-rtc-sunxi kmod-leds-gpio -dnsmasq -wpad-basic-mbedtls" \
