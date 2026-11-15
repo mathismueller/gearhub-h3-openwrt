@@ -12,6 +12,7 @@ Talk to the gateway serial console through the mux
 Everything is also appended to the mux log file (/tmp/gateway-serial.log).
 No eMMC writes anywhere in this path.
 """
+import os
 import select
 import socket
 import subprocess
@@ -69,21 +70,27 @@ class Mux:
 
 def main():
     print("== 1. reboot via SSH ==", flush=True)
-    try:
-        subprocess.run(["ssh", "-o", "ConnectTimeout=8", GW_SSH, "reboot"],
-                       timeout=25, capture_output=True)
-        print("reboot issued", flush=True)
-    except Exception as e:
-        print(f"SSH reboot failed ({e}); power-cycle manually if needed",
-              flush=True)
-    time.sleep(3)
+    if not os.environ.get("NO_REBOOT"):
+        try:
+            subprocess.run(["ssh", "-o", "ConnectTimeout=8", GW_SSH, "reboot"],
+                           timeout=25, capture_output=True)
+            print("reboot issued", flush=True)
+        except Exception as e:
+            print(f"SSH reboot failed ({e}); power-cycle manually if needed",
+                  flush=True)
+        time.sleep(3)
+    else:
+        print("NO_REBOOT=1, attaching to current boot", flush=True)
     m = Mux()
 
     print("== 2. wait for reset ==", flush=True)
-    n, _ = m.expect(b"U-Boot SPL", timeout=300)
-    if n is None:
-        sys.exit("FAIL: no reset within 300s (board still in Linux?)")
-    print("reset seen, watching autoboot", flush=True)
+    if not os.environ.get("NO_REBOOT"):
+        n, _ = m.expect(b"U-Boot SPL", timeout=300)
+        if n is None:
+            sys.exit("FAIL: no reset within 300s (board still in Linux?)")
+        print("reset seen, watching autoboot", flush=True)
+    else:
+        print("NO_REBOOT=1, watching current boot", flush=True)
 
     print("== 3. stop U-Boot autoboot ==", flush=True)
     hits = 0
