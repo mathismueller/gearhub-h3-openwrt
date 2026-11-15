@@ -76,7 +76,13 @@ def main():
     time.sleep(3)
     m = Mux()
 
-    print("== 2. stop U-Boot autoboot ==", flush=True)
+    print("== 2. wait for reset ==", flush=True)
+    n, _ = m.expect(b"U-Boot SPL", timeout=300)
+    if n is None:
+        sys.exit("FAIL: no reset within 300s (board still in Linux?)")
+    print("reset seen, watching autoboot", flush=True)
+
+    print("== 3. stop U-Boot autoboot ==", flush=True)
     hits = 0
     deadline = time.time() + 120
     saw_prompt = False
@@ -108,7 +114,7 @@ def main():
         f"setenv tftpsrvport {TFTP_PORT}",
         f"ping {SERVER_IP}",
     ]
-    print("== 3. network ==", flush=True)
+    print("== 4. network ==", flush=True)
     for c in cmds:
         m.send(c)
         n, out = m.expect(b"=> ", timeout=40)
@@ -134,6 +140,7 @@ def main():
     if not alive:
         sys.exit("FAIL: TFTP server not reachable (L2?). Aborting.")
 
+    print("== 5. TFTP ==", flush=True)
     for fname, addr in [(ZIMAGE, KADDR), (DTB, FADDR)]:
         m.send(f"tftpboot {addr} {fname}")
         n, out = m.expect(b"=> ", timeout=120)
@@ -142,7 +149,7 @@ def main():
         if n is None or b"Bytes transferred" not in out:
             sys.exit(f"FAIL: tftpboot {fname} failed")
 
-    print("== 4. bootz ==", flush=True)
+    print("== 6. bootz ==", flush=True)
     m.send(f"bootz {KADDR} - {FADDR}")
     n, out = m.expect([b"OpenWrt", b"Please press Enter to activate this console",
                         b"Kernel panic", b"Wrong Image Format"],
