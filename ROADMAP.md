@@ -90,8 +90,9 @@ Steps:
 
 ---
 
-## Recovery Ladder (Zero-Brick)
+## Recovery & Rollback Ladder (Zero-Brick)
 
-1. **Bad config**: `firstboot && reboot` (or hold `PL4` reset button).
+1. **Bad config**: `firstboot && reboot` (or hold `PL4` reset button ≥5 s).
 2. **Bad rootfs/kernel**: Interrupt `uboot24.bin` over serial → `initramfs` RAM-boot via TFTP (`:69`) or USB → `sysupgrade -n` previous release.
-3. **Last resort** (only if `0..2047` or `p1` `uboot24.bin` is corrupted): Short eMMC `CLK`/`DAT0` pads at power-on for BROM FEL + `sunxi-fel`.
+3. **Rollback to stock Hornbach firmware**: `scripts/install-emmc.sh` saves `stock-ptable.sfdisk`, `stock-p1.img`, and `stock-p2.img.gz` (~75 MiB total; `0..2047` with `ethaddr`/`binding_key`/`x509` is already untouched). From RAM-booted `initramfs`, restore the partition table + `p1` + `p2` and `mkfs.f2fs -l misc /dev/mmcblk0p3`. *(Note: if EFR32 radios were reflashed from `silabs-firmware-builder`, reflash stock RCP/Z-Wave GBLs if returning to stock `zigbeed`.)*
+4. **Last resort** (only if `0..2047` or `p1` `uboot24.bin` is corrupted): Short eMMC `CLK`/`DAT0` pads at power-on for BROM FEL + `sunxi-fel`.

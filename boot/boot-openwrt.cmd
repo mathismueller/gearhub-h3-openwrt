@@ -1,19 +1,12 @@
-# Fragment to merge into the stage-2 chainloader boot.cmd (after uEnv.txt import).
-# Stage-1 trampoline + uboot24.bin stay frozen. Adds os=openwrt|alpine selector.
-# Compile with: mkimage -C none -A arm -T script -d boot.cmd boot.scr
+# Boot script fragment for stage-2 uboot24.bin (FAT p1: /boot.scr).
+# Leaves factory SPL/U-Boot (sectors 0..2047) and uboot24.bin untouched.
+# Compile with: mkimage -C none -A arm -T script -d boot-openwrt.cmd boot.scr
 
-# defaults (keep Alpine behaviour)
-if test -z "${os}"; then
-    setenv os alpine
+setenv fdt_high ffffffff
+setenv bootargs "console=ttyS0,115200 earlyprintk root=/dev/mmcblk0p2 rootwait watchdog.open_timeout=0"
+
+if test -e ${devtype} ${devnum}:${distro_bootpart} /boot/zImage; then
+    load ${devtype} ${devnum}:${distro_bootpart} ${kernel_addr_r} /boot/zImage
+    load ${devtype} ${devnum}:${distro_bootpart} ${fdt_addr_r} /boot/sun8i-h3-focalcrest-gearhub.dtb
+    bootz ${kernel_addr_r} - ${fdt_addr_r}
 fi
-
-if test "${os}" = "openwrt"; then
-    echo "Booting OpenWrt initramfs (devpart ${root_devpart})..."
-    setenv fdt_high ffffffff
-    setenv bootargs console=ttyS0,115200 earlyprintk root=/dev/ram0 rootwait rw
-    load ${devtype} ${root_devpart} ${kernel_addr_r} /boot/openwrt-initramfs-kernel.bin
-    load ${devtype} ${root_devpart} ${fdt_addr_r} /boot/sun8i-h3-focalcrest-gearhub.dtb
-    bootm ${kernel_addr_r} - ${fdt_addr_r}
-fi
-
-# ... existing Alpine lts / 5.10 branches follow unchanged ...
