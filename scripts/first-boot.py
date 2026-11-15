@@ -122,6 +122,9 @@ def main():
         "setenv netmask 255.255.0.0",
         f"setenv serverip {SERVER_IP}",
         # No tftpsrvport: uboot24.bin always uses TFTP port 69.
+        # Pet the external GPIO supervisor like Alpine does, or the board
+        # resets ~10-20 min after leaving Linux (kernel stops edging PL10).
+        "setenv bootargs console=ttyS0,115200 watchdog.open_timeout=0",
         f"ping {SERVER_IP}",
     ]
     print("== 4. network ==", flush=True)
