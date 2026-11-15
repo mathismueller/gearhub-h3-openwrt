@@ -1,0 +1,17 @@
+#!/bin/sh /etc/rc.common
+START=11
+
+start() {
+	if [ -b /dev/mmcblk1 ]; then
+		echo "/dev/mmcblk1 0x88000 0x20000" > /etc/fw_env.config
+	elif [ -b /dev/mmcblk0 ]; then
+		echo "/dev/mmcblk0 0x88000 0x20000" > /etc/fw_env.config
+	fi
+
+	if command -v fw_printenv >/dev/null 2>&1 && [ -f /etc/fw_env.config ]; then
+		ETHADDR="$(fw_printenv -n ethaddr 2>/dev/null || true)"
+		if [ -n "$ETHADDR" ] && [ -d /sys/class/net/eth0 ]; then
+			ip link set dev eth0 address "$ETHADDR" 2>/dev/null || true
+		fi
+	fi
+}

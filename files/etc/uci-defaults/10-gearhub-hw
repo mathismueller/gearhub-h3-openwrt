@@ -1,0 +1,4 @@
+#!/bin/sh
+/etc/init.d/gearhub-hw enable
+/etc/init.d/gearhub-hw start
+exit 0

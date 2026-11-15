@@ -13,13 +13,17 @@ fi
 cd openwrt-build
 ./scripts/feeds update -a
 ./scripts/feeds install -a
+{
+  echo "CONFIG_GPIO_WATCHDOG=y"
+  echo "CONFIG_GPIO_WATCHDOG_ARCH_INITCALL=y"
+} >> target/linux/sunxi/config-6.12
 cat > .config <<EOF
 CONFIG_TARGET_sunxi=y
 CONFIG_TARGET_sunxi_cortexa7=y
 CONFIG_TARGET_sunxi_cortexa7_DEVICE_${PROFILE}=y
 CONFIG_TARGET_ROOTFS_INITRAMFS=y
+CONFIG_CCACHE=y
 CONFIG_PACKAGE_ser2net=y
-CONFIG_PACKAGE_kmod-wdt-gpio=y
 CONFIG_PACKAGE_uboot-envtools=y
 CONFIG_PACKAGE_gpiod-tools=y
 EOF

@@ -368,6 +368,27 @@
 			compatible = "allwinner,sun8i-h3-pinctrl";
 			phandle = <0x0a>;
 
+			zigbee-reset-hog {
+				gpio-hog;
+				gpios = <0x03 0x09 0x00>;
+				output-high;
+				line-name = "zigbee-reset-n";
+			};
+
+			zwave-reset-hog {
+				gpio-hog;
+				gpios = <0x03 0x0f 0x00>;
+				output-high;
+				line-name = "zwave-reset-n";
+			};
+
+			led-enable-hog {
+				gpio-hog;
+				gpios = <0x03 0x11 0x00>;
+				output-high;
+				line-name = "led-enable";
+			};
+
 			csi-pins {
 				pins = "PE0", "PE2", "PE3", "PE4", "PE5", "PE6", "PE7", "PE8", "PE9", "PE10", "PE11";
 				function = "csi";
