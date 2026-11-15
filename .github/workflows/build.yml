@@ -60,6 +60,22 @@ jobs:
           git clone --branch "v${OPENWRT_VERSION}" --depth 1 \
             https://github.com/openwrt/openwrt.git openwrt
 
+      - name: Cache OpenWrt downloads (dl/)
+        uses: actions/cache@v4
+        with:
+          path: openwrt/dl
+          key: openwrt-dl-${{ env.OPENWRT_VERSION }}-${{ hashFiles('gearhub/.github/workflows/build.yml') }}
+          restore-keys: |
+            openwrt-dl-${{ env.OPENWRT_VERSION }}-
+
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: openwrt/.ccache
+          key: openwrt-ccache-${{ env.OPENWRT_VERSION }}-${{ github.run_id }}
+          restore-keys: |
+            openwrt-ccache-${{ env.OPENWRT_VERSION }}-
+
       - name: Feeds update + install
         working-directory: openwrt
         run: |
@@ -74,6 +90,7 @@ jobs:
           CONFIG_TARGET_sunxi_cortexa7=y
           CONFIG_TARGET_sunxi_cortexa7_DEVICE_${PROFILE}=y
           CONFIG_TARGET_ROOTFS_INITRAMFS=y
+          CONFIG_CCACHE=y
           CONFIG_PACKAGE_ser2net=y
           CONFIG_PACKAGE_kmod-wdt-gpio=y
           CONFIG_PACKAGE_uboot-envtools=y
@@ -87,6 +104,9 @@ jobs:
 
       - name: Build images
         working-directory: openwrt
+        env:
+          CCACHE_DIR: ${{ github.workspace }}/openwrt/.ccache
+          CCACHE_MAXSIZE: 2G
         run: make -j"$(nproc)"
 
       - name: Collect artifacts
