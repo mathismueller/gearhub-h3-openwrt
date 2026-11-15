@@ -3,6 +3,7 @@
 /dl/
 /staging_dir/
 .venv/
+artifacts/
 *.bin
 *.img
 *.img.gz
