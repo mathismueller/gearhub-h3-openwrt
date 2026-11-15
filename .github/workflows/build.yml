@@ -90,10 +90,6 @@ jobs:
           {
             echo "CONFIG_GPIO_WATCHDOG=y"
             echo "CONFIG_GPIO_WATCHDOG_ARCH_INITCALL=y"
-            echo "CONFIG_SERIAL_DEV_BUS=y"
-            echo "CONFIG_SERIAL_DEV_CTRL_TTYPORT=y"
-            echo "CONFIG_BT_HCIUART_SERDEV=y"
-            echo "CONFIG_BT_HCIUART_BCM=y"
           } >> target/linux/sunxi/config-6.12
           cat > .config <<EOF
           CONFIG_TARGET_sunxi=y
@@ -105,10 +101,12 @@ jobs:
           CONFIG_PACKAGE_ser2net=y
           CONFIG_PACKAGE_uboot-envtools=y
           CONFIG_PACKAGE_gpiod-tools=y
+          CONFIG_PACKAGE_i2c-tools=y
           CONFIG_PACKAGE_kmod-rtc-sunxi=y
           CONFIG_PACKAGE_kmod-rtc-pcf8563=y
           CONFIG_PACKAGE_kmod-spi-dev=y
           CONFIG_PACKAGE_kmod-bluetooth=y
+          CONFIG_PACKAGE_kmod-hci-uart=y
           CONFIG_PACKAGE_bluez-utils=y
           EOF
           make defconfig

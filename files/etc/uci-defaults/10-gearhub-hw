@@ -1,4 +1,5 @@
 #!/bin/sh
 /etc/init.d/gearhub-hw enable
 /etc/init.d/gearhub-hw start
+/etc/init.d/gearhub-bt enable
 exit 0

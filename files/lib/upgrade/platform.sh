@@ -67,6 +67,9 @@ platform_do_upgrade() {
 			mount -t vfat -o rw,noatime "/dev/$part1" /tmp/emmc-p1
 			mkdir -p /tmp/emmc-p1/boot
 			cp -af /tmp/img-p1/* /tmp/emmc-p1/boot/ 2>/dev/null || true
+			if [ ! -f /tmp/img-p1/zImage ] && [ -f /tmp/img-p1/uImage ]; then
+				dd if=/tmp/img-p1/uImage of=/tmp/emmc-p1/boot/zImage bs=64 skip=1 2>/dev/null
+			fi
 			sync
 			umount /tmp/emmc-p1
 			umount /tmp/img-p1
