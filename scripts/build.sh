@@ -26,6 +26,9 @@ CONFIG_CCACHE=y
 CONFIG_PACKAGE_ser2net=y
 CONFIG_PACKAGE_uboot-envtools=y
 CONFIG_PACKAGE_gpiod-tools=y
+CONFIG_PACKAGE_kmod-rtc-sunxi=y
+CONFIG_PACKAGE_kmod-rtc-pcf8563=y
+CONFIG_PACKAGE_kmod-spi-dev=y
 EOF
 make defconfig
 cp -r ../files files
