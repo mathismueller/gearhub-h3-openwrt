@@ -17,7 +17,9 @@ Goal: turn the stock **Hornbach Smart Home Gateway V2** (`FocalCrest GearHub H3`
 
 ## Where We Are Now (2026-11-15)
 
-* **CI & Build**: `.github/workflows/build.yml` and `scripts/build.sh` run a **full OpenWrt `25.12.6` source build** on `x86_64` using proxy profile `friendlyarm_nanopi-m1-plus` with `files/` (`ser2net.yaml`, `sysupgrade.conf`) and compile `sun8i-h3-focalcrest-gearhub.dtb` with `dtc`. (Selecting a single `CONFIG_TARGET_sunxi_cortexa7_DEVICE_*` and running `make` instead of `make world` avoids building every `sunxi/cortexa7` board and every package.)
+* **Phase 0 & Phase 1 eMMC boot verified**: Cold power-on eMMC boot works end-to-end (`U-Boot SPL 2020.04` → Stage-1 `uboot24.bin` → `/boot/zImage` + `sun8i-h3-focalcrest-gearhub.dtb` → `overlayfs:/overlay` 7.3 GiB on `mmcblk1p2`), with `eth0` factory MAC, `wlan0` scanning (`brcmfmac43430-sdio.focalcrest,gearhub.*` symlinks), `/dev/rtc0` + `/dev/rtc1`, `/dev/spidev0.0`, `/dev/watchdog0` + `/dev/watchdog1`, and `ser2net` (`:3332`/`:3333`).
+* **Next**: Verify `sysupgrade` with the CI `7372d90` build (`platform.sh` `uImage` → `/boot/zImage` extraction) and test Bluetooth (`kmod-bluetooth` + `kmod-hci-uart` + `bluez-utils` + `gearhub-bt` + user-extracted `BCM43430A1.hcd`).
+* **CI & Build**: `.github/workflows/build.yml` and `scripts/build.sh` run a **full OpenWrt `25.12.6` source build** on `x86_64` using proxy profile `friendlyarm_nanopi-m1-plus` with `files/` and compile `sun8i-h3-focalcrest-gearhub.dtb` + `boot.scr`.
 * **OpenWrt DTS**: `openwrt/target/sunxi/dts/sun8i-h3-focalcrest-gearhub.dts` is a valid `dtc`-decompiled DTS that passes `scripts/check-dts.sh` (to be rewritten against `#include "sun8i-h3.dtsi"` in Phase 3 for upstreaming).
 * **Debug rig**: Serial mux (`scripts/serial-mux.py`) holds UART (`115200 8N1`) → `/tmp/gateway-serial.log` + TCP `127.0.0.1:3335`. `uboot24.bin` has **no `tftpsrvport`** — TFTP must be served on standard UDP **port 69** over direct `en7` link (`169.254.65.108 ↔ 169.254.77.3`).
 
@@ -95,5 +97,5 @@ Steps:
 
 1. **Bad config**: `firstboot && reboot` (or hold `PL4` reset button ≥5 s).
 2. **Bad rootfs/kernel**: Interrupt `uboot24.bin` over serial → `initramfs` RAM-boot via TFTP (`:69`) or USB → `sysupgrade -n` previous release.
-3. **Rollback to stock Hornbach firmware**: `scripts/install-emmc.sh` saves `stock-ptable.sfdisk`, `stock-p1.img`, and `stock-p2.img.gz` (~75 MiB total; `0..2047` with `ethaddr`/`binding_key`/`x509` is already untouched). From RAM-booted `initramfs`, restore the partition table + `p1` + `p2` and `mkfs.f2fs -l misc /dev/mmcblk0p3`. *(Note: if EFR32 radios were reflashed from `silabs-firmware-builder`, reflash stock RCP/Z-Wave GBLs if returning to stock `zigbeed`.)*
+3. **Rollback to stock Hornbach firmware**: `scripts/install-emmc.sh` (or off-device SSH backup) saves `stock-raw-0-2047.bin`, `stock-ptable.txt`, `stock-p1.img`, and `stock-p2.img.gz` (~205 MiB total; `0..2047` with `ethaddr`/`binding_key`/`x509` is already untouched). From RAM-booted `initramfs`, restore the partition table + `p1` + `p2` and `mkfs.f2fs -l misc /dev/mmcblk0p3`. *(Note: if EFR32 radios were reflashed from `silabs-firmware-builder`, reflash stock RCP/Z-Wave GBLs if returning to stock `zigbeed`.)*
 4. **Last resort** (only if `0..2047` or `p1` `uboot24.bin` is corrupted): Short eMMC `CLK`/`DAT0` pads at power-on for BROM FEL + `sunxi-fel`.
