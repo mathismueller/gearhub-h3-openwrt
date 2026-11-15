@@ -18,7 +18,7 @@ jobs:
     permissions:
       contents: read
     env:
-      OPENWRT_VERSION: "25.12.5"
+      OPENWRT_VERSION: "25.12.6"
       TARGET: sunxi/cortexa7
     steps:
       - uses: actions/checkout@v4

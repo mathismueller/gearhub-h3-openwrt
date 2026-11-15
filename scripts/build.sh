@@ -2,7 +2,7 @@
 # Build OpenWrt initramfs via official ImageBuilder (x86_64 only).
 # Does NOT run on aarch64 Mac — use the GH Action instead.
 set -eu
-OPENWRT_VERSION="${OPENWRT_VERSION:-25.12.5}"
+OPENWRT_VERSION="${OPENWRT_VERSION:-25.12.6}"
 TARGET="${TARGET:-sunxi/cortexa7}"
 PROFILE="$(cat openwrt/PROXY_PROFILE | grep -v '^#' | grep PROXY_PROFILE | cut -d= -f2)"
 IB="openwrt-imagebuilder-${OPENWRT_VERSION}-${TARGET/\//-}.Linux-x86_64"
