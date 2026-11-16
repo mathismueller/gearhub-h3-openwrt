@@ -23,9 +23,11 @@ Goal: turn the stock **Hornbach Smart Home Gateway V2** (`FocalCrest GearHub H3`
   * Standalone `uboot24.bin` CI build (`.github/workflows/build-uboot.yml`, `scripts/build-uboot.sh`, `uboot/gearhub.fragment` with `CONFIG_BINMAN_FDT` disabled) tested in RAM and promoted to `/dev/mmcblk1p1`.
   * `8ff9567` `sysupgrade` smoke-tested on hardware (`wlan0` cold-boot reload, `hci0`, `ser2net`, `watchdog0`/`watchdog1` all verified).
   * Clean `#include "sun8i-h3.dtsi"` DTS (`0a1021d`) written, compiled, RAM-booted (`scripts/first-boot.py`), and verified on eMMC via `sysupgrade` (`43850353026` — `rtc0`/`rtc1`, `spidev0.0`, `wlan0`, `hci0`, `ser2net`, `watchdog0`/`watchdog1` all passing); `7e2428f` added `vcc-p*-supply` on `&pio`/`&r_pio`.
-* **Next**: Run `make ARCH=arm dtbs_check` against mainline Linux / `linux-next` before submitting the DTS to `linux-sunxi` and opening the `openwrt/openwrt` `main` PR (plus optionally pin `25.12.6` feed SHAs in `feeds.conf`).
-* **CI & Build**: `.github/workflows/build.yml` and `scripts/build.sh` run a **full OpenWrt `25.12.6` source build** (stable release; keep device builds on `25.12.x` rather than rolling `SNAPSHOT`) on `x86_64` using proxy profile `friendlyarm_nanopi-m1-plus` with `files/`, and preprocess/compile `sun8i-h3-focalcrest-gearhub.dtb` + `boot.scr`.
-* **OpenWrt DTS**: `openwrt/target/sunxi/dts/sun8i-h3-focalcrest-gearhub.dts` is now a clean `#include "sun8i-h3.dtsi"` DTS (ready for `make dtbs_check` against mainline Linux).
+  * **Reproducibility & packages**: `openwrt/feeds.conf` pinned to `25.12.6` release feed SHAs (`6ee86f4`), and `luci` + `kmod-wireguard` + USB serial `kmods` included (`0823095`).
+  * **Phase 3 prep**: `make ARCH=arm CHECK_DTBS=y` and `dt_binding_check` **passed (0 warnings)** in `../linux` (`sunxi/for-next`); OpenWrt upstream branch `focalcrest-gearhub` pushed to `mathismueller/openwrt` (Draft PR `#1` running CI on `59c3f9f`).
+* **Next**: Once `gearhub-h3-openwrt` (`0823095`) and `mathismueller/openwrt#1` (`59c3f9f`) pass CI: (1) tag initial GitHub Releases in `gearhub-h3-openwrt` and `silabs-firmware-builder`, (2) commit + `git send-email` the 4 `linux-sunxi` patches from `../linux`, (3) open the `openwrt/openwrt` `main` PR.
+* **CI & Build**: `.github/workflows/build.yml` and `scripts/build.sh` run a **full OpenWrt `25.12.6` source build** (stable release; pinned `openwrt/feeds.conf`) on `x86_64` using proxy profile `friendlyarm_nanopi-m1-plus` with `files/`, and preprocess/compile `sun8i-h3-focalcrest-gearhub.dtb` + `boot.scr`.
+* **OpenWrt DTS**: `openwrt/target/sunxi/dts/sun8i-h3-focalcrest-gearhub.dts` is a clean `#include "sun8i-h3.dtsi"` DTS validated by `dtbs_check`.
 * **Debug rig**: Serial mux (`scripts/serial-mux.py`) holds UART (`115200 8N1`) → `/tmp/gateway-serial.log` + TCP `127.0.0.1:3335`. `uboot24.bin` has **no `tftpsrvport`** — TFTP must be served on standard UDP **port 69** over direct `en7` link (`169.254.65.108 ↔ 169.254.77.3`).
 
 ---
@@ -89,9 +91,9 @@ Steps:
 ## Phase 3 — Upstreaming (DTS First, Device Second)
 
 `sunxi` builds mainline kernels, so the mainline DTS is the critical path:
-1. ~~Clean `sun8i-h3-focalcrest-gearhub.dts` against `#include "sun8i-h3.dtsi"`~~ (done in `0a1021d`); validate with `make ARCH=arm dtbs_check` against **mainline Linux / `linux-next`** schemas.
-2. Submit DTS to `linux-sunxi` / ARM DT maintainers (`git send-email`, human `Signed-off-by`, `Assisted-by:` trailer if applicable). Carry as an OpenWrt tree patch until merged.
-3. Submit `Device/focalcrest_gearhub` PR to `openwrt/openwrt` **`main`** (`target/linux/sunxi/image/cortexa7.mk`, modeled on `friendlyarm_nanopi-m1-plus`), including safe eMMC/boot handling notes (while keeping gateway/Phase 2 releases on stable OpenWrt `25.12.x`).
+1. ~~Clean `sun8i-h3-focalcrest-gearhub.dts` against `#include "sun8i-h3.dtsi"` and validate with `make ARCH=arm dtbs_check`~~ (0 warnings in `../linux` `sunxi/for-next`, including `vendor-prefixes.yaml`, `arm/sunxi.yaml`, and `allwinner,sun4i-a10-pinctrl.yaml`).
+2. Submit DTS + binding patches to `linux-sunxi` / ARM DT maintainers (`git send-email`, human `Signed-off-by`, `Assisted-by:` trailer if applicable). Carry as an OpenWrt tree patch until merged.
+3. Submit `Device/focalcrest_gearhub` PR to `openwrt/openwrt` **`main`** (staged in `mathismueller/openwrt#1` `focalcrest-gearhub`: `cortexa7.mk`, `uboot-sunxi`, `313-*.patch`, `gearhub-bt`, and safe eMMC `platform.sh`; gateway/Phase 2 releases stay on stable OpenWrt `25.12.x`).
 4. Create OpenWrt Wiki ToH page + forum thread (following the V1 `sercomm_na502` precedent).
 
 **Gate**: `focalcrest_gearhub` merged in `openwrt/openwrt`; this repo shrinks to `ser2net` image config + docs.
