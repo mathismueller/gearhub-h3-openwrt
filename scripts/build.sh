@@ -30,6 +30,12 @@ CONFIG_PACKAGE_gpiod-tools=y
 CONFIG_PACKAGE_kmod-rtc-sunxi=y
 CONFIG_PACKAGE_kmod-rtc-pcf8563=y
 CONFIG_PACKAGE_kmod-spi-dev=y
+CONFIG_PACKAGE_luci=y
+CONFIG_PACKAGE_kmod-wireguard=y
+CONFIG_PACKAGE_kmod-usb-acm=y
+CONFIG_PACKAGE_kmod-usb-serial-cp210x=y
+CONFIG_PACKAGE_kmod-usb-serial-ch341=y
+CONFIG_PACKAGE_kmod-usb-serial-ftdi=y
 EOF
 make defconfig
 cp -r ../files files
