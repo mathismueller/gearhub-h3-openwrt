@@ -1,0 +1,115 @@
+====== FocalCrest GearHub H3 (Hornbach Smart Home Gateway V2 / RFC24) ======
+
+The **FocalCrest GearHub H3** (sold as the **Hornbach Smart Home Gateway V2**, model ''RFC24 V 2.0'') is an Allwinner H3 smart home gateway with 1 GiB DDR3 RAM, 8 GiB eMMC, 100 Mbps Ethernet, Broadcom BCM43430 Wi-Fi/Bluetooth, Silicon Labs EFR32MG24 (Zigbee / Thread), and Silicon Labs EFR32ZG23 (Z-Wave).
+
+===== Supported Versions =====
+
+<!-- ToH: {
+  "source": "json",
+  "dom": "t",
+  "paging": false,
+  "rotate": true,
+  "shownColumns": ["brand", "model", "version", "supportedcurrentrel", "oemdevicehomepageurl", "owrt_forum_topic_url", "deviceid"],
+  "filterColumns": {"deviceid": "^focalcrest_gearhub$"}
+} -->
+
+  * **Community build (OpenWrt 25.12.6):** [[https://github.com/mathismueller/gearhub-h3-openwrt/releases/tag/v25.12.6-r1|v25.12.6-r1]]
+  * **Upstream PR (WIP):** [[https://github.com/mathismueller/openwrt/pull/1|mathismueller/openwrt#1]]
+
+===== Hardware Highlights =====
+
+<!-- ToH: {
+  "source": "json",
+  "dom": "t",
+  "paging": false,
+  "rotate": true,
+  "shownColumns": ["model", "version", "cpu", "cpumhz", "flashmb", "rammb", "wlanhardware", "wlan24ghz", "ethernet100mports", "usbports"],
+  "filterColumns": {"deviceid": "^focalcrest_gearhub$"}
+} -->
+
+  * **SoC / CPU:** Allwinner H3 (4× ARM Cortex-A7 @ 1.008 GHz)
+  * **RAM / Flash:** 1 GiB DDR3 / 8 GiB eMMC (''mmcblk1'')
+  * **Ethernet:** 1× 100 Mbps (''eth0'')
+  * **Wi-Fi / BT:** Broadcom BCM43430 / AP6212A1 (SDIO ''wlan0'' + UART ''ttyS1'' BT, optional user-extracted ''BCM43430A1.hcd'')
+  * **Radios:** Silicon Labs EFR32MG24 (''/dev/ttyS2'', Zigbee/Thread) + Silicon Labs EFR32ZG23 (''/dev/ttyS3'', Z-Wave)
+  * **USB:** 1× USB-A host (''usb1''), 1× USB-C (5 V input + ''usb0'' data; lacks 5.1 kΩ CC pull-downs — use a USB-A↔USB-C cable)
+  * **Watchdogs:** ''sunxi-wdt'' (''/dev/watchdog0'') + external ''PL10'' ''gpio_wdt'' (''/dev/watchdog1'', ''always-running'')
+
+===== Installation =====
+
+**Important:** The board has no SD card slot (''mmc0'' is unpopulated), and factory ''U-Boot 2020.04'' has neither Ethernet nor USB enabled.
+
+  * **Never overwrite raw eMMC sectors ''0..2047'' (''0x0..0xFFFFF''):** Factory SPL (''0x2000''), factory U-Boot (''0xa000''), and factory U-Boot env (''0x88000'': ''ethaddr'', ''serial#'', ''binding_key'') live here.
+  * **Keep Stage-2 ''uboot24.bin'' on ''mmcblk1p1'':** Factory U-Boot executes ''boot.scr'' on ''p1'' to chainload ''uboot24.bin'' (mainline U-Boot 2024.10 with Ethernet/TFTP/USB support).
+
+==== 1. Prepare Stock Device (First-Time Only) ====
+
+Gain a root shell on the stock firmware via the internal UART header (115200 8N1; see Credits below), then copy ''%%uboot24.bin%%'' and ''%%boot.scr%%'' onto ''%%p1%%'' FAT:
+
+<code>
+mkdir -p /tmp/p1
+mount /dev/mmcblk1p1 /tmp/p1   # or /dev/mmcblk0p1 on stock 5.10
+cp /tmp/uboot24.bin /tmp/p1/uboot24.bin
+cp /tmp/boot.scr /tmp/p1/boot.scr
+sync
+umount /tmp/p1
+reboot
+</code>
+
+==== 2. RAM-Boot initramfs & Back Up Stock eMMC ====
+
+Serve the release artifacts over TFTP on **UDP port 69** (host ''%%169.254.65.108%%'' ↔ gateway ''%%169.254.77.3%%'') and boot ''%%initramfs%%'' via ''%%scripts/first-boot.py%%'' (zero eMMC writes). Back up stock eMMC over SSH before flashing:
+
+<code>
+mkdir -p stock-backup
+ssh root@169.254.77.3 "partx -s /dev/mmcblk1" > stock-backup/stock-ptable.txt
+ssh root@169.254.77.3 "dd if=/dev/mmcblk1 bs=512 count=2048 2>/dev/null" > stock-backup/stock-raw-0-2047.bin
+ssh root@169.254.77.3 "dd if=/dev/mmcblk1p1 bs=1M 2>/dev/null" > stock-backup/stock-p1.img
+ssh root@169.254.77.3 "dd if=/dev/mmcblk1p2 bs=1M 2>/dev/null | gzip -1" > stock-backup/stock-p2.img.gz
+</code>
+
+==== 3. Flash OpenWrt to eMMC ====
+
+Upload ''%%*-squashfs-sdcard.img.gz%%'', ''%%openwrt-gearhub-zImage%%'', ''%%sun8i-h3-focalcrest-gearhub.dtb%%'', ''%%boot.scr%%'', and ''%%scripts/install-emmc.sh%%'' to ''%%/tmp/%%'' and run:
+
+<code>
+ssh root@169.254.77.3 "SKIP_BACKUP=1 sh /tmp/install-emmc.sh \
+  /tmp/*-squashfs-sdcard.img.gz \
+  /tmp/openwrt-gearhub-zImage \
+  /tmp/sun8i-h3-focalcrest-gearhub.dtb \
+  /tmp/boot.scr"
+ssh root@169.254.77.3 "sync && reboot"
+</code>
+
+After reboot, OpenWrt boots from eMMC on ''%%192.168.1.1%%''.
+
+===== Z-Wave and ZigBee =====
+
+Both internal Silicon Labs modules are exposed over TCP via ''ser2net'' so a remote host (Home Assistant ZHA, Zigbee2MQTT, Z-Wave JS UI, or OTBR) can connect:
+
+  * **Zigbee / Thread (EFR32MG24):** ''/dev/ttyS2'' (115200 8N1, RTS/CTS) → TCP port ''3332''
+  * **Z-Wave (EFR32ZG23):** ''/dev/ttyS3'' (115200 8N1) → TCP port ''3333''
+
+Prebuilt ''.gbl'' radio firmwares are published in [[https://github.com/mathismueller/silabs-firmware-builder/releases/tag/v2026.11.16|silabs-firmware-builder v2026.11.16]] and can be flashed remotely over ''ser2net'' using ''universal-silabs-flasher''.
+
+===== Optional: Bluetooth (BCM43430A1) =====
+
+Extract ''%%/lib/firmware/brcm/BCM43430A1.hcd%%'' from your ''%%stock-p2.img.gz%%'' backup, copy it to ''%%/lib/firmware/brcm/BCM43430A1.hcd%%'' on OpenWrt, add it to ''%%/etc/sysupgrade.conf%%'', and run ''%%/etc/init.d/gearhub-bt start%%''.
+
+===== Debricking =====
+
+  * **Bad config:** ''%%firstboot && reboot%%'' (or hold ''PL4'' reset button ≥5 s).
+  * **Bad rootfs/kernel:** Interrupt ''uboot24.bin'' over UART → RAM-boot ''initramfs'' via TFTP (''UDP :69'') → ''%%sysupgrade -n%%''.
+  * **Bare-metal FEL (only if ''0..2047'' or ''uboot24.bin'' is corrupted):** Short eMMC ''CLK''/''DAT0'' at power-on for Allwinner BROM FEL (''1f3a:efe8'') over a USB-A↔USB-C cable + ''sunxi-fel''.
+
+===== Bootlog =====
+
+See [[https://github.com/mathismueller/gearhub-h3-openwrt/blob/main/docs/bootlog-dmesg.txt|docs/bootlog-dmesg.txt]] for a full OpenWrt 25.12.6 (Linux 6.12.112) ''dmesg'' boot log.
+
+===== Credits =====
+
+  * Erik Kallen — Initial PoC, UART header discovery, and stock root-shell write-up: [[https://erikkallen.nl/home%20automation/hardware%20hacking/2026/04/05/hornbach-h3-gateway-hack.html|Part 1]], [[https://erikkallen.nl/home%20automation/hardware%20hacking/2026/04/09/hornbach-h3-gateway-root-shell.html|Part 2]].
+
+===== Tags =====
+[[meta:tags|How to add tags]]
+{{tag>sunxi allwinner h3 8192emmc 1024ram 1port fastethernet 1usb usb2.0 1wnic 802.11bgn bluetooth zigbee thread z-wave}}

@@ -1,0 +1,347 @@
+[    0.000000] Booting Linux on physical CPU 0x0
+[    0.000000] Linux version 6.12.112 (runner@runnervmccnms) (arm-openwrt-linux-muslgnueabi-gcc (OpenWrt GCC 14.3.0 r33311-981c978eff) 14.3.0, GNU ld (GNU Binutils) 2.44) #0 SMP Sat Oct 17 21:45:38 2026
+[    0.000000] CPU: ARMv7 Processor [410fc075] revision 5 (ARMv7), cr=30c5387d
+[    0.000000] CPU: div instructions available: patching division code
+[    0.000000] CPU: PIPT / VIPT nonaliasing data cache, VIPT aliasing instruction cache
+[    0.000000] OF: fdt: Machine model: FocalCrest GearHub H3
+[    0.000000] Memory policy: Data cache writealloc
+[    0.000000] Zone ranges:
+[    0.000000]   Normal   [mem 0x0000000040000000-0x000000006fffffff]
+[    0.000000]   HighMem  [mem 0x0000000070000000-0x000000007fffffff]
+[    0.000000] Movable zone start for each node
+[    0.000000] Early memory node ranges
+[    0.000000]   node   0: [mem 0x0000000040000000-0x000000007fffffff]
+[    0.000000] Initmem setup node 0 [mem 0x0000000040000000-0x000000007fffffff]
+[    0.000000] OF: reserved mem: Reserved memory: No reserved-memory node in the DT
+[    0.000000] psci: probing for conduit method from DT.
+[    0.000000] psci: Using PSCI v0.1 Function IDs from DT
+[    0.000000] percpu: Embedded 14 pages/cpu s25612 r8192 d23540 u57344
+[    0.000000] pcpu-alloc: s25612 r8192 d23540 u57344 alloc=14*4096
+[    0.000000] pcpu-alloc: [0] 0 [0] 1 [0] 2 [0] 3 
+[    0.000000] Kernel command line: console=ttyS0,115200 earlyprintk root=/dev/mmcblk1p2 rootwait watchdog.open_timeout=0
+[    0.000000] Unknown kernel command line parameters "earlyprintk", will be passed to user space.
+[    0.000000] Dentry cache hash table entries: 131072 (order: 7, 524288 bytes, linear)
+[    0.000000] Inode-cache hash table entries: 65536 (order: 6, 262144 bytes, linear)
+[    0.000000] Built 1 zonelists, mobility grouping on.  Total pages: 262144
+[    0.000000] mem auto-init: stack:off, heap alloc:off, heap free:off
+[    0.000000] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=4, Nodes=1
+[    0.000000] rcu: Hierarchical RCU implementation.
+[    0.000000] rcu: 	RCU restricting CPUs from NR_CPUS=8 to nr_cpu_ids=4.
+[    0.000000] 	Tracing variant of Tasks RCU enabled.
+[    0.000000] rcu: RCU calculated value of scheduler-enlistment delay is 10 jiffies.
+[    0.000000] rcu: Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=4
+[    0.000000] RCU Tasks Trace: Setting shift to 2 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=4.
+[    0.000000] NR_IRQS: 16, nr_irqs: 16, preallocated irqs: 16
+[    0.000000] GIC: Using split EOI/Deactivate mode
+[    0.000000] rcu: srcu_init: Setting srcu_struct sizes based on contention.
+[    0.000000] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604462750000 ns
+[    0.000000] clocksource: timer: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 79635851949 ns
+[    0.000000] arch_timer: cp15 timer(s) running at 24.00MHz (phys).
+[    0.000000] clocksource: arch_sys_counter: mask: 0xffffffffffffff max_cycles: 0x588fe9dc0, max_idle_ns: 440795202592 ns
+[    0.000002] sched_clock: 56 bits at 24MHz, resolution 41ns, wraps every 4398046511097ns
+[    0.000016] Switching to timer-based delay loop, resolution 41ns
+[    0.000161] Console: colour dummy device 80x25
+[    0.000227] Calibrating delay loop (skipped), value calculated using timer frequency.. 48.00 BogoMIPS (lpj=240000)
+[    0.000245] CPU: Testing write buffer coherency: ok
+[    0.000329] pid_max: default: 32768 minimum: 301
+[    0.009114] Mount-cache hash table entries: 2048 (order: 1, 8192 bytes, linear)
+[    0.009131] Mountpoint-cache hash table entries: 2048 (order: 1, 8192 bytes, linear)
+[    0.013717] /cpus/cpu@0 missing clock-frequency property
+[    0.013749] /cpus/cpu@1 missing clock-frequency property
+[    0.013766] /cpus/cpu@2 missing clock-frequency property
+[    0.013784] /cpus/cpu@3 missing clock-frequency property
+[    0.013795] CPU0: thread -1, cpu 0, socket 0, mpidr 80000000
+[    0.015215] Setting up static identity map for 0x40200000 - 0x40200060
+[    0.015404] rcu: Hierarchical SRCU implementation.
+[    0.015410] rcu: 	Max phase no-delay instances is 1000.
+[    0.015731] Timer migration: 1 hierarchy levels; 8 children per group; 1 crossnode level
+[    0.015900] dyndbg: Ignore empty _ddebug table in a CONFIG_DYNAMIC_DEBUG_CORE build
+[    0.016324] smp: Bringing up secondary CPUs ...
+[    0.027383] CPU1: thread -1, cpu 1, socket 0, mpidr 80000001
+[    0.038527] CPU2: thread -1, cpu 2, socket 0, mpidr 80000002
+[    0.049622] CPU3: thread -1, cpu 3, socket 0, mpidr 80000003
+[    0.049750] smp: Brought up 1 node, 4 CPUs
+[    0.049762] SMP: Total of 4 processors activated (192.00 BogoMIPS).
+[    0.049771] CPU: All CPU(s) started in HYP mode.
+[    0.049775] CPU: Virtualization extensions available.
+[    0.050528] Memory: 1020604K/1048576K available (8764K kernel code, 902K rwdata, 2776K rodata, 2048K init, 259K bss, 25852K reserved, 0K cma-reserved, 262144K highmem)
+[    0.057862] VFP support v0.3: implementor 41 architecture 2 part 30 variant 7 rev 5
+[    0.058131] futex hash table entries: 1024 (order: 4, 65536 bytes, linear)
+[    0.063609] pinctrl core: initialized pinctrl subsystem
+[    0.066801] NET: Registered PF_NETLINK/PF_ROUTE protocol family
+[    0.067147] DMA: preallocated 256 KiB pool for atomic coherent allocations
+[    0.068309] thermal_sys: Registered thermal governor 'step_wise'
+[    0.068463] No ATAGs?
+[    0.072135] /soc/mixer@1100000: Fixed dependency cycle(s) with /soc/lcd-controller@1c0c000
+[    0.072181] /soc/lcd-controller@1c0c000: Fixed dependency cycle(s) with /soc/mixer@1100000
+[    0.072622] /soc/interrupt-controller@1c81000: Fixed dependency cycle(s) with /soc/interrupt-controller@1c81000
+[    0.073075] /soc/mixer@1100000: Fixed dependency cycle(s) with /soc/lcd-controller@1c0c000
+[    0.073463] /soc/mixer@1100000: Fixed dependency cycle(s) with /soc/lcd-controller@1c0c000
+[    0.073563] /soc/lcd-controller@1c0c000: Fixed dependency cycle(s) with /soc/mixer@1100000
+[    0.095763] SCSI subsystem initialized
+[    0.096004] libata version 3.00 loaded.
+[    0.096311] usbcore: registered new interface driver usbfs
+[    0.096357] usbcore: registered new interface driver hub
+[    0.096401] usbcore: registered new device driver usb
+[    0.096740] pps_core: LinuxPPS API ver. 1 registered
+[    0.096747] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.096768] PTP clock support registered
+[    0.097049] Advanced Linux Sound Architecture Driver Initialized.
+[    0.098637] clocksource: Switched to clocksource arch_sys_counter
+[    0.108086] NET: Registered PF_INET protocol family
+[    0.108351] IP idents hash table entries: 16384 (order: 5, 131072 bytes, linear)
+[    0.110574] tcp_listen_portaddr_hash hash table entries: 512 (order: 0, 4096 bytes, linear)
+[    0.110605] Table-perturb hash table entries: 65536 (order: 6, 262144 bytes, linear)
+[    0.110627] TCP established hash table entries: 8192 (order: 3, 32768 bytes, linear)
+[    0.110709] TCP bind hash table entries: 8192 (order: 5, 131072 bytes, linear)
+[    0.110972] TCP: Hash tables configured (established 8192 bind 8192)
+[    0.111511] MPTCP token hash table entries: 1024 (order: 2, 16384 bytes, linear)
+[    0.111816] UDP hash table entries: 512 (order: 2, 16384 bytes, linear)
+[    0.111876] UDP-Lite hash table entries: 512 (order: 2, 16384 bytes, linear)
+[    0.112458] NET: Registered PF_UNIX/PF_LOCAL protocol family
+[    0.114901] workingset: timestamp_bits=14 max_order=18 bucket_order=4
+[    0.124953] squashfs: version 4.0 (2009/01/31) Phillip Lougher
+[    0.127050] jffs2: version 2.2 (NAND) (SUMMARY) (LZMA) (RTIME) (CMODE_PRIORITY) (c) 2001-2006 Red Hat, Inc.
+[    0.132240] bounce: pool size: 64 pages
+[    0.139390] sun4i-usb-phy 1c19400.phy: Couldn't request ID GPIO
+[    0.152966] Serial: 8250/16550 driver, 8 ports, IRQ sharing disabled
+[    0.164004] loop: module loaded
+[    0.167817] dwmac-sun8i 1c30000.ethernet: IRQ eth_wake_irq not found
+[    0.167836] dwmac-sun8i 1c30000.ethernet: IRQ sfty not found
+[    0.167909] dwmac-sun8i 1c30000.ethernet: No regulator found
+[    0.168022] dwmac-sun8i 1c30000.ethernet: PTP uses main clock
+[    0.168049] dwmac-sun8i 1c30000.ethernet: Current syscon value is not the default 148000 (expect 58000)
+[    0.168941] dwmac-sun8i 1c30000.ethernet: No HW DMA feature register supported
+[    0.168962] dwmac-sun8i 1c30000.ethernet: RX Checksum Offload Engine supported
+[    0.168969] dwmac-sun8i 1c30000.ethernet: COE Type 2
+[    0.168981] dwmac-sun8i 1c30000.ethernet: TX Checksum insertion supported
+[    0.168989] dwmac-sun8i 1c30000.ethernet: Normal descriptors
+[    0.168996] dwmac-sun8i 1c30000.ethernet: Chain mode enabled
+[    0.171346] dwmac-sun8i 1c30000.ethernet: Found internal PHY node
+[    0.172059] dwmac-sun8i 1c30000.ethernet: Switch mux to internal PHY
+[    0.172082] dwmac-sun8i 1c30000.ethernet: Powering internal PHY
+[    0.175659] usbcore: registered new interface driver usb-storage
+[    0.176296] mousedev: PS/2 mouse device common for all mice
+[    0.177886] sun6i-rtc 1f00000.rtc: registered as rtc0
+[    0.177932] sun6i-rtc 1f00000.rtc: setting system clock to 2026-11-16T15:48:43 UTC (1794844123)
+[    0.178110] i2c_dev: i2c /dev entries driver
+[    0.180505] sunxi-wdt 1c20ca0.watchdog: Watchdog enabled (timeout=16 sec, nowayout=0)
+[    0.182915] sun8i-ce 1c15000.crypto: Set mod clock to 50000000 (50 Mhz) from 24000000 (24 Mhz)
+[    0.183344] sun8i-ce 1c15000.crypto: will run requests pump with realtime priority
+[    0.183770] sun8i-ce 1c15000.crypto: will run requests pump with realtime priority
+[    0.183921] sun8i-ce 1c15000.crypto: will run requests pump with realtime priority
+[    0.184047] sun8i-ce 1c15000.crypto: will run requests pump with realtime priority
+[    0.184142] sun8i-ce 1c15000.crypto: Register cbc(aes)
+[    0.184173] sun8i-ce 1c15000.crypto: Register ecb(aes)
+[    0.184186] sun8i-ce 1c15000.crypto: Register cbc(des3_ede)
+[    0.184199] sun8i-ce 1c15000.crypto: Register ecb(des3_ede)
+[    0.184213] sun8i-ce 1c15000.crypto: Register md5
+[    0.184225] sun8i-ce 1c15000.crypto: Register sha1
+[    0.184238] sun8i-ce 1c15000.crypto: Register sha224
+[    0.184273] sun8i-ce 1c15000.crypto: Register sha256
+[    0.184288] sun8i-ce 1c15000.crypto: Register sha384
+[    0.184302] sun8i-ce 1c15000.crypto: Register sha512
+[    0.184336] sun8i-ce 1c15000.crypto: TRNG not supported
+[    0.184344] sun8i-ce 1c15000.crypto: CryptoEngine Die ID 1
+[    0.189818] NET: Registered PF_INET6 protocol family
+[    0.191907] Segment Routing with IPv6
+[    0.191980] In-situ OAM (IOAM) with IPv6
+[    0.192068] NET: Registered PF_PACKET protocol family
+[    0.192237] can: controller area network core
+[    0.193176] NET: Registered PF_CAN protocol family
+[    0.193187] 8021q: 802.1Q VLAN Support v1.8
+[    0.193339] Registering SWP/SWPB emulation handler
+[    0.229226] sun4i-usb-phy 1c19400.phy: Couldn't request ID GPIO
+[    0.230311] gpio gpiochip0: Static allocation of GPIO base is deprecated, use dynamic allocation.
+[    0.233579] sun8i-h3-pinctrl 1c20800.pinctrl: initialized sunXi PIO driver
+[    0.235014] gpio gpiochip1: Static allocation of GPIO base is deprecated, use dynamic allocation.
+[    0.236842] sun8i-h3-r-pinctrl 1f02c00.pinctrl: initialized sunXi PIO driver
+[    0.238197] printk: legacy console [ttyS0] disabled
+[    0.259069] 1c28000.serial: ttyS0 at MMIO 0x1c28000 (irq = 139, base_baud = 1500000) is a U6_16550A
+[    0.259151] printk: legacy console [ttyS0] enabled
+[    1.287065] 1c28400.serial: ttyS1 at MMIO 0x1c28400 (irq = 140, base_baud = 1500000) is a U6_16550A
+[    1.319865] 1c28800.serial: ttyS2 at MMIO 0x1c28800 (irq = 141, base_baud = 1500000) is a U6_16550A
+[    1.350573] 1c28c00.serial: ttyS3 at MMIO 0x1c28c00 (irq = 142, base_baud = 1500000) is a U6_16550A
+[    1.363607] dw-apb-uart 1c28400.serial: Failed to create device link (0x180) with 0-0051
+[    1.381224] sun4i-usb-phy 1c19400.phy: Couldn't get regulator usb1_vbus... Deferring probe
+[    1.398059] usb_phy_generic usb_phy_generic.1.auto: dummy supplies not allowed for exclusive requests (id=vbus)
+[    1.409100] musb-hdrc musb-hdrc.2.auto: MUSB HDRC host driver
+[    1.414885] musb-hdrc musb-hdrc.2.auto: new USB bus registered, assigned bus number 1
+[    1.418332] sunxi-mmc 1c11000.mmc: initialized, max. request size: 16384 KB
+[    1.423554] usb usb1: New USB device found, idVendor=1d6b, idProduct=0002, bcdDevice= 6.12
+[    1.437969] usb usb1: New USB device strings: Mfr=3, Product=2, SerialNumber=1
+[    1.445226] usb usb1: Product: MUSB HDRC host driver
+[    1.450208] usb usb1: Manufacturer: Linux 6.12.112 musb-hcd
+[    1.455781] usb usb1: SerialNumber: musb-hdrc.2.auto
+[    1.461390] hub 1-0:1.0: USB hub found
+[    1.465285] hub 1-0:1.0: 1 port detected
+[    1.473848] ehci-platform 1c1c000.usb: EHCI Host Controller
+[    1.473930] ehci-platform 1c1a000.usb: EHCI Host Controller
+[    1.474024] ehci-platform 1c1b000.usb: EHCI Host Controller
+[    1.474051] ehci-platform 1c1b000.usb: new USB bus registered, assigned bus number 2
+[    1.474201] ehci-platform 1c1b000.usb: irq 33, io mem 0x01c1b000
+[    1.474992] ohci-platform 1c1a400.usb: Generic Platform OHCI controller
+[    1.475019] ohci-platform 1c1a400.usb: new USB bus registered, assigned bus number 3
+[    1.475138] ohci-platform 1c1a400.usb: irq 36, io mem 0x01c1a400
+[    1.479535] ehci-platform 1c1c000.usb: new USB bus registered, assigned bus number 4
+[    1.485112] ehci-platform 1c1a000.usb: new USB bus registered, assigned bus number 5
+[    1.488667] ehci-platform 1c1b000.usb: USB 2.0 started, EHCI 1.00
+[    1.488954] usb usb2: New USB device found, idVendor=1d6b, idProduct=0002, bcdDevice= 6.12
+[    1.488989] usb usb2: New USB device strings: Mfr=3, Product=2, SerialNumber=1
+[    1.489000] usb usb2: Product: EHCI Host Controller
+[    1.489008] usb usb2: Manufacturer: Linux 6.12.112 ehci_hcd
+[    1.489016] usb usb2: SerialNumber: 1c1b000.usb
+[    1.489528] ohci-platform 1c1b400.usb: Generic Platform OHCI controller
+[    1.489888] hub 2-0:1.0: USB hub found
+[    1.489957] hub 2-0:1.0: 1 port detected
+[    1.490023] clk: Disabling unused clocks
+[    1.490151] ALSA device list:
+[    1.490159]   No soundcards found.
+[    1.490903] ehci-platform 1c1c000.usb: irq 35, io mem 0x01c1c000
+[    1.491473] ohci-platform 1c1b400.usb: new USB bus registered, assigned bus number 6
+[    1.491640] ohci-platform 1c1b400.usb: irq 37, io mem 0x01c1b400
+[    1.492244] ohci-platform 1c1c400.usb: Generic Platform OHCI controller
+[    1.492272] ohci-platform 1c1c400.usb: new USB bus registered, assigned bus number 7
+[    1.492407] ohci-platform 1c1c400.usb: irq 38, io mem 0x01c1c400
+[    1.498568] ehci-platform 1c1a000.usb: irq 34, io mem 0x01c1a000
+[    1.528634] ehci-platform 1c1c000.usb: USB 2.0 started, EHCI 1.00
+[    1.532884] usb usb3: New USB device found, idVendor=1d6b, idProduct=0001, bcdDevice= 6.12
+[    1.562680] ehci-platform 1c1a000.usb: USB 2.0 started, EHCI 1.00
+[    1.566934] usb usb3: New USB device strings: Mfr=3, Product=2, SerialNumber=1
+[    1.675464] usb usb3: Product: Generic Platform OHCI controller
+[    1.675476] usb usb3: Manufacturer: Linux 6.12.112 ohci_hcd
+[    1.675493] usb usb3: SerialNumber: 1c1a400.usb
+[    1.692107] hub 3-0:1.0: USB hub found
+[    1.695897] mmc1: new DDR MMC card at address 0001
+[    1.695929] hub 3-0:1.0: 1 port detected
+[    1.701970] mmcblk1: mmc1:0001 H8G4a2 7.28 GiB
+[    1.710240] usb usb6: New USB device found, idVendor=1d6b, idProduct=0001, bcdDevice= 6.12
+[    1.718533] usb usb6: New USB device strings: Mfr=3, Product=2, SerialNumber=1
+[    1.725800] usb usb6: Product: Generic Platform OHCI controller
+[    1.731734] usb usb6: Manufacturer: Linux 6.12.112 ohci_hcd
+[    1.737307] usb usb6: SerialNumber: 1c1b400.usb
+[    1.742688] hub 6-0:1.0: USB hub found
+[    1.746524]  mmcblk1: p1 p2
+[    1.749374] hub 6-0:1.0: 1 port detected
+[    1.750409] mmcblk1boot0: mmc1:0001 H8G4a2 4.00 MiB
+[    1.758940] usb usb5: New USB device found, idVendor=1d6b, idProduct=0002, bcdDevice= 6.12
+[    1.759434] mmcblk1boot1: mmc1:0001 H8G4a2 4.00 MiB
+[    1.767242] usb usb5: New USB device strings: Mfr=3, Product=2, SerialNumber=1
+[    1.779432] usb usb5: Product: EHCI Host Controller
+[    1.784365] usb usb5: Manufacturer: Linux 6.12.112 ehci_hcd
+[    1.789988] usb usb5: SerialNumber: 1c1a000.usb
+[    1.795220] hub 5-0:1.0: USB hub found
+[    1.799115] hub 5-0:1.0: 1 port detected
+[    1.804243] usb usb7: New USB device found, idVendor=1d6b, idProduct=0001, bcdDevice= 6.12
+[    1.812625] usb usb7: New USB device strings: Mfr=3, Product=2, SerialNumber=1
+[    1.819870] usb usb7: Product: Generic Platform OHCI controller
+[    1.825791] usb usb7: Manufacturer: Linux 6.12.112 ohci_hcd
+[    1.831370] usb usb7: SerialNumber: 1c1c400.usb
+[    1.836498] hub 7-0:1.0: USB hub found
+[    1.840339] hub 7-0:1.0: 1 port detected
+[    1.845422] usb usb4: New USB device found, idVendor=1d6b, idProduct=0002, bcdDevice= 6.12
+[    1.853761] usb usb4: New USB device strings: Mfr=3, Product=2, SerialNumber=1
+[    1.861046] usb usb4: Product: EHCI Host Controller
+[    1.865930] usb usb4: Manufacturer: Linux 6.12.112 ehci_hcd
+[    1.871527] usb usb4: SerialNumber: 1c1c000.usb
+[    1.876755] hub 4-0:1.0: USB hub found
+[    1.880586] hub 4-0:1.0: 1 port detected
+[    1.891316] VFS: Mounted root (squashfs filesystem) readonly on device 179:2.
+[    1.901115] Freeing unused kernel image (initmem) memory: 2048K
+[    1.907264] Run /sbin/init as init process
+[    1.911423]   with arguments:
+[    1.911433]     /sbin/init
+[    1.911440]     earlyprintk
+[    1.911447]   with environment:
+[    1.911453]     HOME=/
+[    1.911459]     TERM=linux
+[    2.158927] init: Console is alive
+[    2.162616] init: - watchdog -
+[    2.668332] kmodloader: loading kernel modules from /etc/modules-boot.d/*
+[    2.701547] kmodloader: done loading kernel modules from /etc/modules-boot.d/*
+[    2.711529] init: - preinit -
+[    6.638650] random: crng init done
+[    7.093190] dwmac-sun8i 1c30000.ethernet eth0: Register MEM_TYPE_PAGE_POOL RxQ-0
+[    7.104343] dwmac-sun8i 1c30000.ethernet eth0: PHY [mdio_mux-0.1:01] driver [Generic PHY] (irq=POLL)
+[    7.113572] dwmac-sun8i 1c30000.ethernet eth0: No Safety Features support found
+[    7.120915] dwmac-sun8i 1c30000.ethernet eth0: No MAC Management Counters available
+[    7.128588] dwmac-sun8i 1c30000.ethernet eth0: PTP not supported by HW
+[    7.136233] dwmac-sun8i 1c30000.ethernet eth0: configuring for phy/mii link mode
+[    7.146960] dwmac-sun8i 1c30000.ethernet eth0: Link is Up - 100Mbps/Full - flow control off
+[   11.319555] loop0: detected capacity change from 0 to 15226880
+[   11.398657] loop0: detected capacity change from 15226880 to 15215744
+[   11.407692] mount_root: overlay filesystem in /dev/loop0 has not been formatted yet
+[   12.031432] platform wifi-pwrseq: deferred probe pending: pwrseq_simple: external clock not ready
+[   12.684927] F2FS-fs (loop0): Found nat_bits in checkpoint
+[   12.800360] F2FS-fs (loop0): Mounted with checkpoint version = 2e05f501
+[   12.807770] mount_root: overlay filesystem has not been fully initialized yet
+[   12.815645] mount_root: switching to f2fs overlay
+[   12.881803] FAT-fs (mmcblk1p1): Volume was not properly unmounted. Some data may be corrupt. Please run fsck.
+[   13.121615] urandom-seed: Seed file not found (/etc/urandom.seed)
+[   13.266751] dwmac-sun8i 1c30000.ethernet eth0: Link is Down
+[   13.281517] procd: - early -
+[   13.284587] procd: - watchdog -
+[   13.866423] procd: - watchdog -
+[   13.869975] procd: - ubus -
+[   14.029577] procd: - init -
+[   14.715271] kmodloader: loading kernel modules from /etc/modules.d/*
+[   15.020997] urngd: v1.0.2 started.
+[   15.296332] hid: raw HID events driver (C) Jiri Kosina
+[   15.334723] Bluetooth: Core ver 2.22
+[   15.338477] NET: Registered PF_BLUETOOTH protocol family
+[   15.343851] Bluetooth: HCI device and connection manager initialized
+[   15.350245] Bluetooth: HCI socket layer initialized
+[   15.355131] Bluetooth: L2CAP socket layer initialized
+[   15.360254] Bluetooth: SCO socket layer initialized
+[   15.366939] Bluetooth: BNEP (Ethernet Emulation) ver 1.3
+[   15.372372] Bluetooth: BNEP filters: protocol multicast
+[   15.377620] Bluetooth: BNEP socket layer initialized
+[   15.383446] brcmutil: loading out-of-tree module taints kernel.
+[   15.391496] usbcore: registered new interface driver cdc_acm
+[   15.397182] cdc_acm: USB Abstract Control Model driver for USB modems and ISDN adapters
+[   15.421783] Loading modules backported from Linux version v6.18.55-0-g725bd2f3c
+[   15.429177] Backport generated by backports.git 0c0df20
+[   15.436672] Bluetooth: HCI UART driver ver 2.3
+[   15.441180] Bluetooth: HCI UART protocol H4 registered
+[   15.446320] Bluetooth: HCI UART protocol BCSP registered
+[   15.453244] Bluetooth: HIDP (Human Interface Emulation) ver 1.2
+[   15.459224] Bluetooth: HIDP socket layer initialized
+[   15.476025] Bluetooth: RFCOMM TTY layer initialized
+[   15.481008] Bluetooth: RFCOMM socket layer initialized
+[   15.486175] Bluetooth: RFCOMM ver 1.11
+[   15.493075] rtc-pcf8563 0-0051: low voltage detected, date/time is not reliable.
+[   15.500709] rtc-pcf8563 0-0051: registered as rtc1
+[   15.506426] dw-apb-uart 1c28400.serial: Failed to create device link (0x180) with 0-0051
+[   15.522294] sunxi-mmc 1c10000.mmc: allocated mmc-pwrseq
+[   15.528217] usbcore: registered new interface driver usbserial_generic
+[   15.534864] usbserial: USB Serial support registered for generic
+[   15.566446] sunxi-mmc 1c10000.mmc: initialized, max. request size: 16384 KB
+[   15.591176] usbcore: registered new interface driver ch341
+[   15.596801] usbserial: USB Serial support registered for ch341-uart
+[   15.604809] usbcore: registered new interface driver cp210x
+[   15.610549] usbserial: USB Serial support registered for cp210x
+[   15.631629] usbcore: registered new interface driver ftdi_sio
+[   15.637518] usbserial: USB Serial support registered for FTDI USB Serial Device
+[   15.685964] PPP generic driver version 2.4.2
+[   15.686236] mmc2: new high speed SDIO card at address 0001
+[   15.691780] NET: Registered PF_PPPOX protocol family
+[   15.704482] wireguard: WireGuard 1.0.0 loaded. See www.wireguard.com for information.
+[   15.712355] wireguard: Copyright (C) 2015-2019 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights Reserved.
+[   15.737391] brcmfmac: brcmf_fw_alloc_request: using brcm/brcmfmac43430-sdio for chip BCM43430/1
+[   15.746374] usbcore: registered new interface driver brcmfmac
+[   15.759213] kmodloader: done loading kernel modules from /etc/modules.d/*
+[   16.141634] brcmfmac: brcmf_c_process_txcap_blob: no txcap_blob available (err=-2)
+[   16.150315] brcmfmac: brcmf_c_preinit_dcmds: Firmware: BCM43430/1 wl0: Aug 16 2022 03:05:14 version 7.45.98.125 (5b7978c CY) FWID 01-f420b81d
+[   20.556352] dwmac-sun8i 1c30000.ethernet eth0: Register MEM_TYPE_PAGE_POOL RxQ-0
+[   20.568377] dwmac-sun8i 1c30000.ethernet eth0: PHY [mdio_mux-0.1:01] driver [Generic PHY] (irq=POLL)
+[   20.577655] dwmac-sun8i 1c30000.ethernet eth0: No Safety Features support found
+[   20.585054] dwmac-sun8i 1c30000.ethernet eth0: No MAC Management Counters available
+[   20.592798] dwmac-sun8i 1c30000.ethernet eth0: PTP not supported by HW
+[   20.599498] dwmac-sun8i 1c30000.ethernet eth0: configuring for phy/mii link mode
+[   20.615014] br-lan: port 1(eth0) entered blocking state
+[   20.620344] br-lan: port 1(eth0) entered disabled state
+[   20.625685] dwmac-sun8i 1c30000.ethernet eth0: entered allmulticast mode
+[   20.632859] dwmac-sun8i 1c30000.ethernet eth0: entered promiscuous mode
+[   22.660053] dwmac-sun8i 1c30000.ethernet eth0: Link is Up - 100Mbps/Full - flow control off
+[   22.668504] br-lan: port 1(eth0) entered blocking state
+[   22.673783] br-lan: port 1(eth0) entered forwarding state

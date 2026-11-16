@@ -52,6 +52,8 @@ See **[docs/INSTALL.md](docs/INSTALL.md)** for full step-by-step instructions, `
 ## Repository Layout
 
 - [docs/INSTALL.md](docs/INSTALL.md) — Full installation, `sysupgrade`, optional Bluetooth, and recovery guide
+- [docs/OPENWRT_WIKI_DRAFT.txt](docs/OPENWRT_WIKI_DRAFT.txt) — Draft OpenWrt DokuWiki ToH page (preview locally with `pandoc -f dokuwiki -t html -s --metadata title="OpenWrt Wiki Preview — FocalCrest GearHub H3" docs/OPENWRT_WIKI_DRAFT.txt -o /tmp/openwrt-wiki-preview.html`)
+- [docs/bootlog-dmesg.txt](docs/bootlog-dmesg.txt) — Verified OpenWrt `25.12.6` (`6.12.112`) `dmesg` boot log
 - [ROADMAP.md](ROADMAP.md) — Phased migration plan, architecture decisions, and upstreaming roadmap
 - `openwrt/` — Device stanza and `sun8i-h3-focalcrest-gearhub.dts`
 - `files/` — OpenWrt rootfs overlay (`ser2net.yaml`, `sysupgrade.conf`, `init.d/gearhub-hw`, `init.d/gearhub-bt`, `lib/firmware/brcm/` symlinks, `rc.button/reset`, `lib/upgrade/platform.sh`)
