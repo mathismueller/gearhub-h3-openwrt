@@ -15,10 +15,13 @@ Goal: turn the stock **Hornbach Smart Home Gateway V2** (`FocalCrest GearHub H3`
 | **Hardware Init & Button** | OpenRC `alphorn-hw` + Rust `alphorn-button` | **Redo → DTS + `uci-defaults` / `procd` + `kmod-gpio-button-hotplug`** | Deassert `PD9`/`PD15` radio resets, preserve `ethaddr` from `0x88000`, handle `PL4` reset via `/etc/rc.button/reset`. |
 | **Flash Wear** | Custom `zram`, `commit=600`, `syslogd -C128` | **Mostly built-in** (`tmpfs` `/tmp` + RAM `logread` ring buffer) | OpenWrt already avoids rootfs log/tmp writes; optionally add `zram-swap` if needed. |
 
-## Where We Are Now (2026-11-15)
+## Where We Are Now (2026-11-16)
 
-* **Phase 0 & Phase 1 eMMC boot verified**: Cold power-on eMMC boot works end-to-end (`U-Boot SPL 2020.04` → Stage-1 `uboot24.bin` → `/boot/zImage` + `sun8i-h3-focalcrest-gearhub.dtb` → `overlayfs:/overlay` 7.3 GiB on `mmcblk1p2`), with `eth0` factory MAC, `wlan0` scanning (`brcmfmac43430-sdio.focalcrest,gearhub.*` symlinks), `/dev/rtc0` + `/dev/rtc1`, `/dev/spidev0.0`, `/dev/watchdog0` + `/dev/watchdog1`, and `ser2net` (`:3332`/`:3333`).
-* **Next**: Verify `sysupgrade` with the CI `7372d90` build (`platform.sh` `uImage` → `/boot/zImage` extraction) and test Bluetooth (`kmod-bluetooth` + `kmod-hci-uart` + `bluez-utils` + `gearhub-bt` + user-extracted `BCM43430A1.hcd`).
+* **Phase 0 & Phase 1 complete and verified on hardware**:
+  * Cold power-on eMMC boot works end-to-end (`U-Boot SPL 2020.04` → CI-built Stage-2 `uboot24.bin` (`U-Boot 2024.10`) → FIT `uImage` (`bootm`) + `sun8i-h3-focalcrest-gearhub.dtb` → `overlayfs:/overlay` 7.3 GiB on `mmcblk1p2`).
+  * Verified `sysupgrade` (preserving `uboot24.bin`, `boot.scr`, and user-extracted `BCM43430A1.hcd`), `eth0` factory MAC, `wlan0` (with PCF8563 32.768 kHz LPO clock + `brcmfmac43430-sdio.focalcrest,gearhub.*` symlinks), Bluetooth `hci0` (`gearhub-bt`), `/dev/rtc0` + `/dev/rtc1`, `/dev/spidev0.0`, `/dev/watchdog0` + `/dev/watchdog1`, and `ser2net` (`:3332`/`:3333`).
+  * Standalone `uboot24.bin` CI build (`.github/workflows/build-uboot.yml`, `scripts/build-uboot.sh`, `uboot/gearhub.fragment` with `CONFIG_BINMAN_FDT` disabled) tested in RAM and promoted to `/dev/mmcblk1p1`.
+* **Next**: Smoke-test `build-firmware` (`8ff9567`) `sysupgrade` once CI finishes, then begin Phase 3 (clean `sun8i-h3-focalcrest-gearhub.dts` against mainline `sun8i-h3.dtsi` for `make dtbs_check` + `openwrt/openwrt` PR).
 * **CI & Build**: `.github/workflows/build.yml` and `scripts/build.sh` run a **full OpenWrt `25.12.6` source build** on `x86_64` using proxy profile `friendlyarm_nanopi-m1-plus` with `files/` and compile `sun8i-h3-focalcrest-gearhub.dtb` + `boot.scr`.
 * **OpenWrt DTS**: `openwrt/target/sunxi/dts/sun8i-h3-focalcrest-gearhub.dts` is a valid `dtc`-decompiled DTS that passes `scripts/check-dts.sh` (to be rewritten against `#include "sun8i-h3.dtsi"` in Phase 3 for upstreaming).
 * **Debug rig**: Serial mux (`scripts/serial-mux.py`) holds UART (`115200 8N1`) → `/tmp/gateway-serial.log` + TCP `127.0.0.1:3335`. `uboot24.bin` has **no `tftpsrvport`** — TFTP must be served on standard UDP **port 69** over direct `en7` link (`169.254.65.108 ↔ 169.254.77.3`).
