@@ -11,6 +11,7 @@ if [ ! -d openwrt-build ]; then
     https://github.com/openwrt/openwrt.git openwrt-build
 fi
 cd openwrt-build
+cp ../openwrt/feeds.conf feeds.conf
 ./scripts/feeds update -a
 ./scripts/feeds install -a
 {

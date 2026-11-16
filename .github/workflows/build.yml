@@ -81,8 +81,9 @@ jobs:
             openwrt-ccache-${{ env.OPENWRT_VERSION }}-
 
       - name: Feeds update + install
-        working-directory: openwrt
         run: |
+          cp gearhub/openwrt/feeds.conf openwrt/feeds.conf
+          cd openwrt
           ./scripts/feeds update -a
           ./scripts/feeds install -a
 
