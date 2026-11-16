@@ -115,19 +115,24 @@ After reboot, OpenWrt boots from eMMC with `br-lan` at **`192.168.1.1`** (standa
 
 ### One-Time EFR32 Radio Flashing over `ser2net`
 
-You can flash `.gbl` images from `silabs-firmware-builder` remotely over TCP using `universal-silabs-flasher` (stop Zigbee2MQTT / OTBR / Z-Wave JS first so the `ser2net` port is idle):
+You can flash `.gbl` images from [`silabs-firmware-builder` (`v2026.11.16`)](https://github.com/mathismueller/silabs-firmware-builder/releases/tag/v2026.11.16) remotely over TCP using `universal-silabs-flasher` (stop Zigbee2MQTT / OTBR / Z-Wave JS first so the `ser2net` port is idle):
 
 ```sh
-# Zigbee NCP or OpenThread RCP (EFR32MG24 on :3332)
+# Zigbee NCP (EFR32MG24 on :3332)
 universal-silabs-flasher \
   --device socket://<gateway-ip>:3332 \
-  flash --firmware gateway_v2_zigbee_ncp.gbl
+  flash --firmware https://github.com/mathismueller/silabs-firmware-builder/releases/download/v2026.11.16/gateway_v2_zigbee_ncp_9.1.1.0_hw_flow_115200.gbl
+
+# OR OpenThread RCP (EFR32MG24 on :3332)
+universal-silabs-flasher \
+  --device socket://<gateway-ip>:3332 \
+  flash --firmware https://github.com/mathismueller/silabs-firmware-builder/releases/download/v2026.11.16/gateway_v2_openthread_rcp_3.1.1.0_GitHub-fb274efe6_gsdk_2026.6.1.gbl
 
 # Z-Wave Controller 8.1.1 (EFR32ZG23 on :3333)
 universal-silabs-flasher \
   --device socket://<gateway-ip>:3333 \
   --probe-methods zwave:115200 \
-  flash --firmware gateway_v2_zwave_controller_8.1.1.gbl
+  flash --firmware https://github.com/mathismueller/silabs-firmware-builder/releases/download/v2026.11.16/gateway_v2_zwave_controller_8.1.1.gbl
 ```
 
 ### Hardware SWD Fallback (If Gecko Bootloader Entry Fails)
