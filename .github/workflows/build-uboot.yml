@@ -1,0 +1,59 @@
+name: build-uboot
+
+on:
+  push:
+    paths:
+      - uboot/**
+      - scripts/build-uboot.sh
+      - openwrt/target/sunxi/dts/**
+      - .github/workflows/build-uboot.yml
+  pull_request:
+    paths:
+      - uboot/**
+      - scripts/build-uboot.sh
+      - openwrt/target/sunxi/dts/**
+      - .github/workflows/build-uboot.yml
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build-uboot:
+    name: Stage-2 U-Boot (v2024.10)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install U-Boot build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            bc bison build-essential device-tree-compiler flex \
+            gcc-arm-linux-gnueabihf libssl-dev python3-dev \
+            python3-setuptools swig
+
+      - name: Build uboot24.bin
+        run: ./scripts/build-uboot.sh
+
+      - name: Upload uboot24.bin artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gearhub-uboot24
+          path: |
+            artifacts/uboot24.bin
+            artifacts/uboot24.bin.sha256
+          compression-level: 9
+          if-no-files-found: error
+
+      - name: Upload uboot24.bin release asset
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" \
+            --repo "${{ github.repository }}" \
+            --clobber \
+            artifacts/uboot24.bin artifacts/uboot24.bin.sha256

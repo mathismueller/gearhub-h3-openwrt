@@ -9,12 +9,36 @@ This guide covers installing OpenWrt (`25.12.6`, Linux `6.12`) onto the **Hornba
 - **UART serial adapter** (`115200 8N1`) connected to the internal debug header.
 - **Direct Ethernet link** between your host and the gateway.
 - **TFTP server on UDP port `69`** (the stage-2 `uboot24.bin` bootloader does not support custom TFTP ports). Default IPs used by [scripts/first-boot.py](../scripts/first-boot.py): host `169.254.65.108` ↔ gateway `169.254.77.3`.
-- **Build artifacts** from [GitHub Releases](../../../releases) (or a local `scripts/build.sh` run):
+- **Build artifacts** from [GitHub Releases](../../../releases) (or local `scripts/build.sh` + `scripts/build-uboot.sh` runs):
+  - `uboot24.bin` *(for first-time setup on unmodified stock gateways)*
   - `*-initramfs-kernel.bin`
   - `*-squashfs-sdcard.img.gz`
   - `openwrt-gearhub-zImage`
   - `sun8i-h3-focalcrest-gearhub.dtb`
   - `boot.scr`
+
+---
+
+## 0. Stock Device Preparation (First-Time Only)
+
+> **Already running `alphorn-gateway` (or `uboot24.bin` already on `p1`)?** Skip directly to [Step 1](#1-boot-openwrt-in-ram-zero-emmc-writes).
+
+Factory `U-Boot 2020.04` has **no Ethernet** and **no USB**, so unmodified stock Hornbach gateways must first install stage-2 `uboot24.bin` onto the existing FAT16 boot partition (`p1`):
+
+1. Obtain a root shell on the stock Hornbach OS (`5.10.176`) via the internal UART header (see Erik Kallen's *Hornbach H3 Gateway Hack* Part 1 & Part 2).
+2. Mount `p1` and copy `uboot24.bin` + `boot.scr` onto it (never touch raw eMMC sectors `0..2047`):
+   ```sh
+   mkdir -p /tmp/p1
+   mount /dev/mmcblk1p1 /tmp/p1   # (or /dev/mmcblk0p1 on stock 5.10)
+   cp /tmp/uboot24.bin /tmp/p1/uboot24.bin
+   cp /tmp/boot.scr /tmp/p1/boot.scr
+   sync
+   umount /tmp/p1
+   reboot
+   ```
+3. *(Alternative bare-metal path if stock shell is unavailable)*: Short eMMC `CLK`/`DAT0` pads at power-on to enter USB FEL mode (`1f3a:efe8`) and RAM-boot `uboot24.bin` via `sunxi-fel`.
+
+On reboot, factory `U-Boot 2020.04` executes `boot.scr` Stage-1 and chainloads `uboot24.bin` (`U-Boot 2024.10` with Ethernet/TFTP/USB). Continue to Step 1.
 
 ---
 
@@ -88,6 +112,23 @@ After reboot, OpenWrt boots from eMMC with `br-lan` at **`192.168.1.1`** (standa
 - **Z-Wave** (`/dev/ttyS3`): connect Z-Wave JS UI to `tcp://<gateway-ip>:3333` (`115200`, `8N1`).
 
 > **Radio firmware note:** EFR32 flash is independent of the Linux rootfs. If you haven't already updated the radio firmwares, compatible `zigbee_ncp` / `ot-rcp` and `zwave 8.1.1` GBLs are built in `silabs-firmware-builder` (stock Z-Wave `7.22.0` has known TX-queue lockups).
+
+### One-Time EFR32 Radio Flashing over `ser2net`
+
+You can flash `.gbl` images from `silabs-firmware-builder` remotely over TCP using `universal-silabs-flasher` (stop Zigbee2MQTT / OTBR / Z-Wave JS first so the `ser2net` port is idle):
+
+```sh
+# Zigbee NCP or OpenThread RCP (EFR32MG24 on :3332)
+universal-silabs-flasher \
+  --device socket://<gateway-ip>:3332 \
+  flash --firmware gateway_v2_zigbee_ncp.gbl
+
+# Z-Wave Controller 8.1.1 (EFR32ZG23 on :3333)
+universal-silabs-flasher \
+  --device socket://<gateway-ip>:3333 \
+  --probe-methods zwave:115200 \
+  flash --firmware gateway_v2_zwave_controller_8.1.1.gbl
+```
 
 ---
 
