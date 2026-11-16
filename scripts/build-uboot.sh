@@ -22,8 +22,14 @@ if [ -f "${UBOOT_DIR}/scripts/dtc/pylibfdt/libfdt.i_shipped" ]; then
 fi
 
 DTB_PATH="${OUT_DIR}/sun8i-h3-focalcrest-gearhub.dtb"
-dtc -@ -I dts -O dtb -o "$DTB_PATH" \
-  "${ROOT_DIR}/openwrt/target/sunxi/dts/sun8i-h3-focalcrest-gearhub.dts"
+DTS_FILE="${ROOT_DIR}/openwrt/target/sunxi/dts/sun8i-h3-focalcrest-gearhub.dts"
+if [ -f "${UBOOT_DIR}/dts/upstream/src/arm/allwinner/sun8i-h3.dtsi" ]; then
+  DTS_INC_ARGS="-I ${UBOOT_DIR}/dts/upstream/include -I ${UBOOT_DIR}/dts/upstream/src/arm/allwinner"
+else
+  DTS_INC_ARGS="-I ${UBOOT_DIR}/include -I ${UBOOT_DIR}/arch/arm/dts"
+fi
+cpp -nostdinc $DTS_INC_ARGS -undef -x assembler-with-cpp "$DTS_FILE" \
+  | dtc -@ -I dts -O dtb -o "$DTB_PATH" -
 
 make -C "$UBOOT_DIR" ARCH=arm CROSS_COMPILE="$CROSS_COMPILE" nanopi_m1_plus_defconfig
 (
