@@ -98,6 +98,13 @@ Steps:
 
 ---
 
+## Optional Add-on — On-Device OpenThread Border Router (OTBR)
+
+* **Radio firmware**: Hardware-test `gateway_v2_openthread_rcp` (`ot-rcp` from `silabs-firmware-builder`, currently Renode-validated) on `/dev/ttyS2` (`EFR32MG24`, **XOR** with `zigbee_ncp`).
+* **Host daemon (`apk`)**: Install OpenWrt's `otbr-agent` package via `apk` for standalone Thread Border Routing on `br-lan` (disable/stop `ser2net` on `/dev/ttyS2` when running `otbr-agent` locally so they don't contend for the UART; document both local `otbr-agent` and remote-host OTBR over `:3332`).
+
+---
+
 ## Recovery & Rollback Ladder (Zero-Brick)
 
 1. **Bad config**: `firstboot && reboot` (or hold `PL4` reset button ≥5 s).
