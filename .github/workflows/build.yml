@@ -53,11 +53,9 @@ jobs:
             python3-setuptools rsync swig unzip zlib1g-dev file wget \
             device-tree-compiler u-boot-tools
 
-      - name: Compile and validate GearHub DTB & boot.scr
+      - name: Compile boot.scr
         run: |
           mkdir -p artifacts
-          dtc -I dts -O dtb -o artifacts/sun8i-h3-focalcrest-gearhub.dtb \
-            gearhub/openwrt/target/sunxi/dts/sun8i-h3-focalcrest-gearhub.dts
           mkimage -C none -A arm -T script -d gearhub/boot/boot-openwrt.cmd artifacts/boot.scr
 
       - name: Clone OpenWrt
@@ -128,6 +126,13 @@ jobs:
 
       - name: Collect artifacts
         run: |
+          KDIR="$(echo openwrt/build_dir/target-*/linux-sunxi_cortexa7/linux-6.12.*)"
+          cpp -nostdinc \
+            -I "$KDIR/include" \
+            -I "$KDIR/arch/arm/boot/dts/allwinner" \
+            -undef -x assembler-with-cpp \
+            gearhub/openwrt/target/sunxi/dts/sun8i-h3-focalcrest-gearhub.dts \
+            | dtc -I dts -O dtb -o artifacts/sun8i-h3-focalcrest-gearhub.dtb -
           cp openwrt/bin/targets/sunxi/cortexa7/*"${PROFILE}"*initramfs* artifacts/ 2>/dev/null || true
           cp openwrt/bin/targets/sunxi/cortexa7/*"${PROFILE}"*sysupgrade.bin artifacts/ 2>/dev/null || true
           cp openwrt/bin/targets/sunxi/cortexa7/*"${PROFILE}"*sdcard.img.gz artifacts/ 2>/dev/null || true
