@@ -130,6 +130,27 @@ universal-silabs-flasher \
   flash --firmware gateway_v2_zwave_controller_8.1.1.gbl
 ```
 
+### Hardware SWD Fallback (If Gecko Bootloader Entry Fails)
+
+If a bad radio image prevents software entry into the Gecko Bootloader over `ser2net`, both radios can be recovered directly over 3-wire SWD (`SWCLK`, `SWDIO`, `GND`) using `probe-rs` (e.g. Raspberry Pi Pico / RP2040 `debugprobe`, J-Link, or ST-Link):
+
+> **Pinout & power warning:** The header/pad numbers below are from a single `RFC24 V 2.0` board and are **not guaranteed** across hardware revisions. Always cross-reference `PA01` (`SWCLK`) and `PA02` (`SWDIO`) against the Silicon Labs datasheets ([EFR32MG24 Datasheet](https://www.silabs.com/documents/public/data-sheets/efr32mg24-datasheet.pdf), [EFR32ZG23 Datasheet](https://www.silabs.com/documents/public/data-sheets/efr32zg23-datasheet.pdf)) and verify with a **multimeter continuity test** before probing. Keep the gateway powered by its 12 V barrel plug and **do not** connect 3.3 V / VDD from your SWD probe.
+
+| Radio | Chip (`probe-rs`) | `SWCLK` | `SWDIO` | `GND` |
+|---|---|---|---|---|
+| **Zigbee / Thread** (`EFR32MG24`) | `EFR32MG24A020F1024IM40` | `PA01` (QFN40 Pin 27 / Daughterboard Pin 17 / Motherboard 8-pin Header **Pin 5**) | `PA02` (QFN40 Pin 28 / Daughterboard Pin 18 / Motherboard 8-pin Header **Pin 6**) | Common `GND` / screw ring |
+| **Z-Wave** (`EFR32ZG23`) | `EFR32FG23A010F512` | `PA01` (QFN40 Pin 22 / Daughterboard **Pad 44**) | `PA02` (QFN40 Pin 23 / Daughterboard **Pad 45**) | Header Pin 1 / `GND` pad |
+
+```sh
+# Zigbee / Thread (EFR32MG24) — flash .hex (preserves Gecko Bootloader at 0x08000000..0x08005FFF)
+probe-rs download --chip EFR32MG24A020F1024IM40 --protocol swd --speed 1000 \
+  --binary-format hex --verify --reset gateway_v2_zigbee_ncp.hex
+
+# Z-Wave (EFR32ZG23) — flash .hex (FG23A010F512 shares silicon/flash controller)
+probe-rs download --chip EFR32FG23A010F512 --binary-format hex --verify --reset \
+  gateway_v2_zwave_controller_8.1.1.hex
+```
+
 ---
 
 ## 5. Optional: Enable Bluetooth (`BCM43430A1`)
