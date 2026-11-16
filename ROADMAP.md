@@ -4,15 +4,15 @@ Goal: turn the stock **Hornbach Smart Home Gateway V2** (`FocalCrest GearHub H3`
 
 ## Architectural Decisions (OpenWrt Best Practices & Keep-vs-Redo from Alpine)
 
-| Area | Alpine (`alphorn-gateway`) | OpenWrt (`gearhub-h3-openwrt`) | Rationale |
+| Area | Prior Alpine setup | OpenWrt (`gearhub-h3-openwrt`) | Rationale |
 |---|---|---|---|
 | **Radio firmware** | Custom 39 MHz / `CTUNE 140` GBLs from `silabs-firmware-builder` | **Keep** (`zigbee_ncp` or `ot-rcp` on `ttyS2`, `zwave 8.1.1` on `ttyS3`) | Hardware-calibrated for this board's EFR32MG24 / EFR32ZG23; stored in EFR32 flash, independent of Linux rootfs. |
-| **Wi-Fi / BT / LEDs** | `brcmfmac`, `hciattach bcm43xx`, Rust `alphorn-ledd` + `lamp` | **OpenWrt-native** (`kmod-brcmfmac` + `cypress-firmware-43430-sdio` + `wpad-basic-mbedtls`; `kmod-leds-gpio` / SPI LED support; standard BT if easy) | Stock OpenWrt experience like V1 `sercomm_na502`; no custom Rust LED daemon needed. |
+| **Wi-Fi / BT / LEDs** | `brcmfmac`, `hciattach bcm43xx`, custom LED daemon + `lamp` | **OpenWrt-native** (`kmod-brcmfmac` + `cypress-firmware-43430-sdio` + `wpad-basic-mbedtls`; `kmod-leds-gpio` / SPI LED support; standard BT if easy) | Stock OpenWrt experience like V1 `sercomm_na502`; no custom Rust LED daemon needed. |
 | **Bootloader / Chainloader** | Factory SPL+U-Boot untouched (`0..2047`), stage-2 `uboot24.bin` on `p1` FAT | **Keep** stage-2 `uboot24.bin` on `p1` FAT | **Zero-brick safety**: SD slot is unpopulated, factory U-Boot lacks USB/Ethernet, and USB-C lacks CC pull-downs (needs USB-A↔USB-C cable for data/FEL). Without `uboot24.bin`, a bad kernel/rootfs requires opening the case and shorting eMMC `CLK`/`DAT0` for FEL. |
 | **eMMC Partition Layout** | Custom 4-part A/B (`p1` FAT, `p2`/`p3` ext4 slots, `p4` `/data`) | **Redo → Standard OpenWrt** (`p1` FAT `/boot`, `p2` SquashFS + `rootfs_data` overlay) | Aligns with `sunxi/cortexa7` OpenWrt (`firstboot` factory reset, read-only SquashFS, `sysupgrade -c` config preservation). **No A/B slots.** |
-| **Upgrade & Revert** | Custom `gw-upgrade` A/B + Rust `alphorn-button` | **Redo → Stock `sysupgrade`** (+ `owut` once upstreamed) | Revert/recover via `firstboot` (bad config) or TFTP/USB `initramfs` via `uboot24.bin` (bad image). |
-| **Watchdogs** | Custom Rust `alphorn-watchdog` | **Redo → Kernel `gpio_wdt` + `procd`** | `PL10` external supervisor runs with `always-running` + `watchdog.open_timeout=0` (kernel pets it); `procd` natively pets `/dev/watchdog0` (`sunxi_wdt`). |
-| **Hardware Init & Button** | OpenRC `alphorn-hw` + Rust `alphorn-button` | **Redo → DTS + `uci-defaults` / `procd` + `kmod-gpio-button-hotplug`** | Deassert `PD9`/`PD15` radio resets, preserve `ethaddr` from `0x88000`, handle `PL4` reset via `/etc/rc.button/reset`. |
+| **Upgrade & Revert** | Custom `gw-upgrade` A/B + button daemon | **Redo → Stock `sysupgrade`** (+ `owut` once upstreamed) | Revert/recover via `firstboot` (bad config) or TFTP/USB `initramfs` via `uboot24.bin` (bad image). |
+| **Watchdogs** | Custom watchdog daemon | **Redo → Kernel `gpio_wdt` + `procd`** | `PL10` external supervisor runs with `always-running` + `watchdog.open_timeout=0` (kernel pets it); `procd` natively pets `/dev/watchdog0` (`sunxi_wdt`). |
+| **Hardware Init & Button** | OpenRC init script + button daemon | **Redo → DTS + `uci-defaults` / `procd` + `kmod-gpio-button-hotplug`** | Deassert `PD9`/`PD15` radio resets, preserve `ethaddr` from `0x88000`, handle `PL4` reset via `/etc/rc.button/reset`. |
 | **Flash Wear** | Custom `zram`, `commit=600`, `syslogd -C128` | **Mostly built-in** (`tmpfs` `/tmp` + RAM `logread` ring buffer) | OpenWrt already avoids rootfs log/tmp writes; optionally add `zram-swap` if needed. |
 
 ## Where We Are Now (2026-11-16)
@@ -35,7 +35,7 @@ Goal: turn the stock **Hornbach Smart Home Gateway V2** (`FocalCrest GearHub H3`
 ## Phase 0 — Valid DTS + RAM-Boot `initramfs` (No eMMC Writes)
 
 1. **Fix DTS syntax & hardware essentials**:
-   * Decompile the working binary `sun8i-h3-focalcrest-gearhub.dtb` (from `alphorn-gateway/firmware/boot/`) with `dtc -I dtb -O dts` into valid DTS, then clean it against mainline `sun8i-h3.dtsi` so `scripts/check-dts.sh` (`dtc`) passes.
+   * Decompile the stock `sun8i-h3-focalcrest-gearhub.dtb` with `dtc -I dtb -O dts` into valid DTS, then clean it against mainline `sun8i-h3.dtsi` so `scripts/check-dts.sh` (`dtc`) passes.
    * Ensure critical nodes are present and enabled:
      * `linux,wdt-gpio` on `PL10` (`always-running`) + `sun6i-a31-wdt` (`sunxi_wdt`) — **without `gpio_wdt` + `watchdog.open_timeout=0`, the external supervisor resets the board**.
      * `uart2` (`ttyS2`, `PA0..PA3`, RTS/CTS) and `uart3` (`ttyS3`, `PA13..PA14`), plus `vcc_zigbee` (`PD16`).

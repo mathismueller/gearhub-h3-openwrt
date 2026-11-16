@@ -21,7 +21,7 @@ This guide covers installing OpenWrt (`25.12.6`, Linux `6.12`) onto the **Hornba
 
 ## 0. Stock Device Preparation (First-Time Only)
 
-> **Already running `alphorn-gateway` (or `uboot24.bin` already on `p1`)?** Skip directly to [Step 1](#1-boot-openwrt-in-ram-zero-emmc-writes).
+> **Already have `uboot24.bin` on `p1`?** Skip directly to [Step 1](#1-boot-openwrt-in-ram-zero-emmc-writes).
 
 Factory `U-Boot 2020.04` has **no Ethernet** and **no USB**, so unmodified stock Hornbach gateways must first install stage-2 `uboot24.bin` onto the existing FAT16 boot partition (`p1`):
 
