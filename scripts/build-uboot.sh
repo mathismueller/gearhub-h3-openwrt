@@ -14,6 +14,13 @@ if [ ! -d "$UBOOT_DIR/.git" ]; then
   git clone --depth 1 --branch "$UBOOT_TAG" https://github.com/u-boot/u-boot.git "$UBOOT_DIR"
 fi
 
+# SWIG 4.3+ (Ubuntu 24.04+) adds a 3rd arg to SWIG_Python_AppendOutput; SWIG_AppendOutput is portable
+if [ -f "${UBOOT_DIR}/scripts/dtc/pylibfdt/libfdt.i_shipped" ]; then
+  sed -i.bak 's/SWIG_Python_AppendOutput/SWIG_AppendOutput/g' \
+    "${UBOOT_DIR}/scripts/dtc/pylibfdt/libfdt.i_shipped"
+  rm -f "${UBOOT_DIR}/scripts/dtc/pylibfdt/libfdt.i_shipped.bak"
+fi
+
 DTB_PATH="${OUT_DIR}/sun8i-h3-focalcrest-gearhub.dtb"
 dtc -@ -I dts -O dtb -o "$DTB_PATH" \
   "${ROOT_DIR}/openwrt/target/sunxi/dts/sun8i-h3-focalcrest-gearhub.dts"
