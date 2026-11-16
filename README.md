@@ -62,6 +62,14 @@ See **[docs/INSTALL.md](docs/INSTALL.md)** for full step-by-step instructions, `
 
 ---
 
+## Credits
+
+- **Initial PoC, UART header discovery, and stock root-shell write-up:** Erik Kallen
+  - [Hornbach H3 Gateway Hack (Part 1)](https://erikkallen.nl/home%20automation/hardware%20hacking/2026/04/05/hornbach-h3-gateway-hack.html)
+  - [Hornbach H3 Gateway Root Shell (Part 2)](https://erikkallen.nl/home%20automation/hardware%20hacking/2026/04/09/hornbach-h3-gateway-root-shell.html)
+
+---
+
 ## Disclaimers
 
 - **Non-affiliation:** This is an independent community project. It is **not** affiliated with, endorsed by, sponsored by, or supported by **Hornbach** or **FocalCrest**. All product names and trademarks belong to their respective owners.
