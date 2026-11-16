@@ -1262,6 +1262,8 @@
 	wifi_pwrseq {
 		compatible = "mmc-pwrseq-simple";
 		reset-gpios = <0x0a 0x06 0x0c 0x01>;
+		clocks = <0x1c>;
+		clock-names = "ext_clock";
 		phandle = <0x0c>;
 	};
 
