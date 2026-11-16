@@ -30,7 +30,7 @@ jobs:
     name: Full source build (sunxi/cortexa7)
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
     env:
       OPENWRT_VERSION: "25.12.6"
       PROFILE: friendlyarm_nanopi-m1-plus
